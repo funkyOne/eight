@@ -51,10 +51,16 @@
 (defn start-timer []
   (reset! timer-handle (js/setInterval tick 1000)))
 
+(defn speak [text]
+  (let [uter (js/SpeechSynthesisUtterance. text)]
+    (set! (.. uter -voice) (aget (.getVoices (.-speechSynthesis js/window)) 2))
+    (.speak (.-speechSynthesis js/window) uter)))
+
 (defn select-exercise [i]  
   (let [exercise ((:exercises plan) i)
         timeline (gen-exercise-segments exercise)
         duration (:end-time (last timeline))]
+    (speak (:name exercise))
     (reset! state {:index i  :exercise exercise :timeline timeline :duration duration :current 0}))  
   (reset-timer))
 
@@ -68,7 +74,7 @@
                  :else (let [next-i (inc (:index @state))]
                          (if (< next-i (count (:exercises plan)))
                            (select-exercise next-i)
-                           (stop)))))))
+                           (stop)))))))  
 
 ;; COMPONENTS
 (defn button-stop []
@@ -91,31 +97,32 @@
            :value "START"
            :on-click (fn [_event] (select-exercise 0))}])
 
-(defn segment-view [current index segment] [:span {:class ["segment" (when (= index current) "active")]} (if (= "e" (:type segment)) "🟢" "⚪")])
+(defn segment-view [current index segment] ^{:key index}[:span {:class ["segment" (when (= index current) "active")]} (if (= "e" (:type segment)) "🟢" "⚪")])
 
 (defn exercise-view [exercise timeline current]
   [:div.exercise
    [:span (inc @current-time)]
    [button-pause]
    [button-resume]
+    [:input {:type "button"
+             :value "SPEAK "
+             :on-click (fn [_event] (speak "test oleg"))}]
    [:div
-    [:span "duration: "]    
+    [:span "duration: "]
     [:span (:duration exercise)]]
    [:div
     [:span "segment: "]
     [:span current]]
    [:span "exercise: "]
-   [:span (:name exercise)]   
-   (map-indexed (partial segment-view current) timeline)]
-  )
+   [:span (:name exercise)]
+   (map-indexed (partial segment-view current) timeline)])
 
 
 (defn container []
   [:div
    [button-stop]
    [button-start]
-   (if-not (nil? @state) (exercise-view (:exercise @state) (:timeline @state) (:current @state)) [:div "no exercise"])
-  ])
+   (if-not (nil? @state) (exercise-view (:exercise @state) (:timeline @state) (:current @state)) [:div "no exercise"])])
 
 ;; RENDER
 (defn root []
