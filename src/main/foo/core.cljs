@@ -30,7 +30,9 @@
 
 (defn gen-exercise-segments [exercise] (butlast (gengen exercise (:repetitions exercise) [] 0)))
 
-(defn stop-timer [] (js/clearInterval @timer-handle)) 
+(defn stop-timer []
+  (js/clearInterval @timer-handle)
+  (reset! timer-handle nil))
 
 (defn stop []
   (stop-timer)
@@ -44,6 +46,9 @@
 (defn reset-timer []
   (stop-timer)
   (reset! current-time 0)
+  (reset! timer-handle (js/setInterval tick 1000)))
+
+(defn start-timer []
   (reset! timer-handle (js/setInterval tick 1000)))
 
 (defn select-exercise [i]  
@@ -63,13 +68,23 @@
                  :else (let [next-i (inc (:index @state))]
                          (if (< next-i (count (:exercises plan)))
                            (select-exercise next-i)
-                           (stop-timer)))))))
+                           (stop)))))))
 
 ;; COMPONENTS
 (defn button-stop []
   [:input {:type "button"
            :value "STOP"
            :on-click (fn [_event] (stop))}])
+
+(defn button-pause []
+  [:input {:type "button"
+           :value "PAUSE"
+           :on-click (fn [_event] (stop-timer))}])
+
+(defn button-resume []
+  [:input {:type "button"
+           :value "RESUME"
+           :on-click (fn [_event] (start-timer))}])
 
 (defn button-start []
   [:input {:type "button"
@@ -81,6 +96,8 @@
 (defn exercise-view [exercise timeline current]
   [:div.exercise
    [:span (inc @current-time)]
+   [button-pause]
+   [button-resume]
    [:div
     [:span "duration: "]    
     [:span (:duration exercise)]]
