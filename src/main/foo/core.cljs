@@ -76,7 +76,7 @@
            :value "START"
            :on-click (fn [_event] (select-exercise 0))}])
 
-(defn segment-view [segment] [:span (if (= "e" (:type segment)) "🟢" "⚪")])
+(defn segment-view [current index segment] [:span {:class ["segment" (when (= index current) "active")]} (if (= "e" (:type segment)) "🟢" "⚪")])
 
 (defn exercise-view [exercise timeline current]
   [:div.exercise
@@ -89,7 +89,7 @@
     [:span current]]
    [:span "exercise: "]
    [:span (:name exercise)]   
-   (map segment-view timeline)]
+   (map-indexed (partial segment-view current) timeline)]
   )
 
 
