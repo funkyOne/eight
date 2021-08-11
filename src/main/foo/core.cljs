@@ -4,12 +4,22 @@
 
 ;; STATE
 
-(def plan {:name "Plan 1"
-           :exercises [{:name "Blinking (2 minutes)" :duration 3 :rest 3 :repetitions 10}
+(def plan {:name "Eye exercises"
+           :exercises [{:name "Blink often" :duration 60 :repetitions 1}
+                       {:name "Blinking slow" :duration 3 :rest 3 :repetitions 10}
                        {:name "Head Movement clockwise" :duration 15 :repetitions 1}
                        {:name "Head Movement counterclockwise" :duration 15 :repetitions 1}
                        {:name "Head Movement side to side" :duration 15 :repetitions 1}
-                       {:name "Head Movement up and down" :duration 15 :repetitions 1}]})
+                       {:name "Head Movement up and down" :duration 15 :repetitions 1}
+                       {:name "Eye Movement - left/right" :duration 30 :repetitions 1}
+                       {:name "Eye Movement - up/down" :duration 30 :repetitions 1}
+                       {:name "Eye Movement - 8" :duration 30 :repetitions 1}
+                       {:name "Eye Movement - random direction" :duration 30 :repetitions 1}
+                       {:name "Squeezing Eyes Shut" :duration 3 :rest 3 :repetitions 10}
+                       {:name "Eyes Shut Movements" :duration 60 :repetitions 1}
+                       {:name "Change Focus" :duration 10 :rest 0 :repetitions 6}
+                       {:name "Temple Massage" :duration 10 :rest 5 :repetitions 4}
+                       {:name "Eyes Palming" :duration 60 :repetitions 1}]})
 
 (defonce state (r/atom nil))
 
