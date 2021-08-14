@@ -17,7 +17,7 @@
                        {:name "Eye Movement - random direction" :duration 30 :repetitions 1}
                        {:name "Squeezing Eyes Shut" :duration 3 :rest 3 :repetitions 10}
                        {:name "Eyes Shut Movements" :duration 60 :repetitions 1}
-                       {:name "Change Focus" :duration 10 :rest 0 :repetitions 6}
+                       {:name "Change Focus" :duration 10 :rest 10 :repetitions 3} ;; here rest is de-focus, this makes it sound ok, maybe we should replace rest with mode generic term, something like "alternate"
                        {:name "Temple Massage" :duration 10 :rest 5 :repetitions 4}
                        {:name "Eyes Palming" :duration 60 :repetitions 1}]})
 
