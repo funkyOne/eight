@@ -11,8 +11,8 @@
                        {:name "Head Movement counterclockwise" :duration 15 :repetitions 1}
                        {:name "Head Movement side to side" :duration 15 :repetitions 1}
                        {:name "Head Movement up and down" :duration 15 :repetitions 1}
-                       {:name "Eye Movement - left/right" :duration 30 :repetitions 1}
-                       {:name "Eye Movement - up/down" :duration 30 :repetitions 1}
+                       {:name "Eye Movement - left and right" :duration 30 :repetitions 1}
+                       {:name "Eye Movement - up and down" :duration 30 :repetitions 1}
                        {:name "Eye Movement - 8" :duration 30 :repetitions 1}
                        {:name "Eye Movement - random direction" :duration 30 :repetitions 1}
                        {:name "Squeezing Eyes Shut" :duration 3 :rest 3 :repetitions 10}
