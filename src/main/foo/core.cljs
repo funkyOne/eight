@@ -21,6 +21,11 @@
                        {:name "Temple Massage" :duration 10 :rest 5 :repetitions 4}
                        {:name "Eyes Palming" :duration 60 :repetitions 1}]})
 
+(defn preload-sound [path]
+  (let [el (.createElement js/document "audio")]
+    (.setAttribute el "src" path)
+    (.setAttribute el "preload" "true")
+    el))
 (defonce state (r/atom nil))
 
 (defonce timer-handle (atom nil))
