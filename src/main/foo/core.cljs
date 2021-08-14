@@ -26,6 +26,11 @@
     (.setAttribute el "src" path)
     (.setAttribute el "preload" "true")
     el))
+
+(defonce sound-up (preload-sound "sounds/220202__gameaudio__teleport-casual.wav"))
+
+(defonce sound-down (preload-sound "sounds/220174__gameaudio__spacey-loose.wav"))
+
 (defonce state (r/atom nil))
 
 (defonce timer-handle (atom nil))
@@ -54,22 +59,24 @@
   (reset! current-time 0)
   (reset! state nil))
 
-(defn get-current [] (:exercise @state))
-
 (defn tick [] (swap! current-time inc))
+
+(defn start-timer []
+  (reset! timer-handle (js/setInterval tick 1000)))
 
 (defn reset-timer []
   (stop-timer)
   (reset! current-time 0)
-  (reset! timer-handle (js/setInterval tick 1000)))
-
-(defn start-timer []
-  (reset! timer-handle (js/setInterval tick 1000)))
+  (start-timer))
 
 (defn speak [text]
   (let [uter (js/SpeechSynthesisUtterance. text)]
     (set! (.. uter -voice) (aget (.getVoices (.-speechSynthesis js/window)) 2))
     (.speak (.-speechSynthesis js/window) uter)))
+
+(defn on-finish []
+  (speak (rand-nth [ "good job!" "nice one, pal!" "well done, buddy!" "you are the best" "all done!" "you've made it"]))
+  (stop))
 
 (defn select-exercise [i]  
   (let [exercise ((:exercises plan) i)
@@ -77,19 +84,35 @@
         duration (:end-time (last timeline))]
     (speak (:name exercise))
     (reset! state {:index i  :exercise exercise :timeline timeline :duration duration :current 0}))  
-  (reset-timer))
+ (reset-timer))
+
+(defn next-segment []
+  ((swap! state (fn [state] (update state :current inc)))))
+
+(add-watch state :segment-switch-observer
+           (fn [_ _ old-state new-state]
+             (let [prev (:current old-state)
+                   new (:current new-state)]
+               (when (and (= (:index old-state) (:index new-state)) (not (= prev new))) ;;when changed segment inside exercise
+                 (let [timeline     (:timeline @state)
+                       prev-segment (nth timeline prev)]
+                   (when (= (:type prev-segment) "e")
+                     (.play sound-down))
+                   (when (= (:type prev-segment) "r")
+                     (.play sound-up)))))))
+             
 
 (add-watch current-time :counter-observer
            (fn [_ _ _ new-time]
              (let [segment-i (:current @state)
-                   segment  (nth (:timeline @state) segment-i)]
+                   segment (nth (:timeline @state) segment-i)]
                (cond
-                 (< new-time (:end-time segment)) nil ;;current segment is not finished
-                 (< new-time (:duration @state)) (swap! state (fn [state] (update state :current inc)))
-                 :else (let [next-i (inc (:index @state))]
-                         (if (< next-i (count (:exercises plan)))
-                           (select-exercise next-i)
-                           (stop)))))))  
+                 (< new-time (:end-time segment)) nil ;;current segment is not finished, keeping on
+                 (< new-time (:duration @state)) (next-segment) ;;segment finished, moving to next segment
+                 :else (let [next-i (inc (:index @state))] ;;exercise finished
+                         (if (< next-i (count (:exercises plan)));; are there more excercises?
+                           (select-exercise next-i) ;;yes, moving to next
+                           (on-finish))))))) ;;no more excercises, stopping
 
 ;; COMPONENTS
 (defn button-stop []
