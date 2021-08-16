@@ -135,6 +135,11 @@
            :value "START"
            :on-click (fn [_event] (select-exercise 0))}])
 
+(defn button-next []
+  [:input {:type "button"
+           :value ">>"
+           :on-click (fn [_event] (select-exercise (inc (:index @state))))}])
+
 (defn segment-view [current index segment] ^{:key index}[:span {:class ["segment" (when (= index current) "active")]} (if (= "e" (:type segment)) "🟢" "⚪")])
 
 (defn exercise-view [exercise timeline current]
@@ -142,9 +147,10 @@
    [:span (inc @current-time)]
    [button-pause]
    [button-resume]
-    [:input {:type "button"
-             :value "SPEAK "
-             :on-click (fn [_event] (speak "test oleg"))}]
+   [button-next]
+   [:input {:type "button"
+            :value "SPEAK "
+            :on-click (fn [_event] (speak "test oleg"))}]
    [:div
     [:span "duration: "]
     [:span (:duration exercise)]]
