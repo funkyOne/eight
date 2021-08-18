@@ -1,17 +1,12 @@
-{:deps
- {:aliases [:cljs]}
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
 
- :nrepl
- {:port 9001
-  :init-ns utils}
+ :dependencies [[reagent "1.1.0"]]
 
  :dev-http {9000 "public"}
 
  :builds
  {:app {:target :browser
-        :output-dir "public/js"
-        :asset-path "js"
-        :modules {:main {:entries [foo.core]
-                         :init-fn foo.core/init}}
-        :devtools {:repl-init-ns foo.core
-                   :after-load foo.core/init}}}}
+         :modules {:main {:init-fn foo.core/init}}}}}

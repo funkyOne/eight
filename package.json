@@ -1,21 +1,15 @@
 {
   "name": "eight",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "version": "0.0.1",
+  "private": true,
   "devDependencies": {
-    "shadow-cljs": "^2.15.2"
+    "shadow-cljs": "2.15.5"
   },
   "scripts": {
-    "server": "shadow-cljs server",
-    "server:repl": "shadow-cljs clj-repl",
-    "app:compile": "shadow-cljs compile app",
-    "app:release": "shadow-cljs release app",
-    "app:watch": "shadow-cljs watch app",
-    "app:repl": "shadow-cljs cljs-repl app"
+    "start": "shadow-cljs watch app"
   },
   "dependencies": {
-    "react": "16.13.0",
-    "react-dom": "16.13.0"
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   }
 }
