@@ -1,5 +1,8 @@
-.calva/
-.cpcache/
-.shadow-cljs/
 node_modules/
 public/js/
+
+.calva/
+.cpcache/
+.lsp
+.shadow-cljs/
+.DS_Store
