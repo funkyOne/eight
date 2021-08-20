@@ -75,16 +75,16 @@
     (.speak (.-speechSynthesis js/window) uter)))
 
 (defn on-finish []
-  (speak (rand-nth [ "good job!" "nice one, pal!" "well done, buddy!" "you are the best" "all done!" "you've made it"]))
+  (speak (rand-nth ["good job!" "nice one, pal!" "well done, buddy!" "you are the best" "all done!" "you've made it"]))
   (stop))
 
-(defn select-exercise [i]  
+(defn select-exercise [i]
   (let [exercise ((:exercises plan) i)
         timeline (gen-exercise-segments exercise)
         duration (:end-time (last timeline))]
     (speak (:name exercise))
-    (reset! state {:index i  :exercise exercise :timeline timeline :duration duration :current 0}))  
- (reset-timer))
+    (reset! state {:index i  :exercise exercise :timeline timeline :duration duration :current 0}))
+  (reset-timer))
 
 (defn next-segment []
   ((swap! state (fn [state] (update state :current inc)))))
@@ -100,7 +100,7 @@
                      (.play sound-down))
                    (when (= (:type prev-segment) "r")
                      (.play sound-up)))))))
-             
+
 
 (add-watch current-time :counter-observer
            (fn [_ _ _ new-time]
