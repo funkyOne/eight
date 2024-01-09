@@ -13,5 +13,6 @@ export const speak = (text: string): void => {
   }
 
   utterance.lang = 'en-GB';
+  window.speechSynthesis.cancel(); // Cancel any previous utterances
   window.speechSynthesis.speak(utterance);
 };
