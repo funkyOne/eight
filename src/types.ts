@@ -11,7 +11,7 @@ export interface Plan {
 }
 
 export interface ExerciseSegment {
-  type: "e" | "r"; // 'e' for exercise, 'r' for rest
+  type: "w" | "r"; // 'e' for exercise, 'r' for rest
   startOffset: number;
   duration: number;
   endOffset: number;

@@ -9,10 +9,3 @@ export const speak = (text: string): void => {
 
   window.speechSynthesis.speak(utterance);
 };
-
-export const preloadSound = (path: string): HTMLAudioElement => {
-  const audioElement = document.createElement("audio");
-  audioElement.setAttribute("src", path);
-  audioElement.setAttribute("preload", "true");
-  return audioElement;
-};

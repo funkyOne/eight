@@ -3,7 +3,10 @@ import { useState } from "preact/hooks";
 import { ExerciseView } from "./components/ExerciseView";
 import ControlButtons from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
-import { speak, preloadSound } from "./utils/speechSynthesis";
+import { speak } from "./utils/speechSynthesis";
+
+const restSound = new Audio('/src/assets/220174__gameaudio__spacey-loose.wav');
+const workSound = new Audio('/src/assets/220202__gameaudio__teleport-casual.wav');
 
 // Mock data for demonstration
 const plan: Plan = {
@@ -35,7 +38,7 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
   for (let i = 0; i < exercise.repetitions; i++) {
     // Add exercise segment
     segments.push({
-      type: "e", // 'e' for exercise
+      type: "w", // "w" for work
       startOffset: currentOffset,
       endOffset: currentOffset + exercise.duration * 1000,
       duration: exercise.duration,
@@ -100,6 +103,13 @@ const App = () => {
 
         // Check if there are more segments in the current exercise
         if (nextSegmentIndex < timeline.length) {
+
+          if (timeline[nextSegmentIndex].type === 'r') {
+            void restSound.play(); // Play the rest sound
+          } else {
+            void workSound.play(); // Play the work sound
+          }
+
           console.log("Next segment");
           return { ...currentState, segmentIndex: nextSegmentIndex, secondsElapsedInSegment: elapsed };
         } else {
@@ -121,10 +131,10 @@ const App = () => {
   };
 
   const stopTimer = () => {
-    if (currentTimer) {
-      clearInterval(currentTimer);
-      setCurrentTimer(null);
-    }
+    if (!currentTimer) return;
+
+    clearInterval(currentTimer);
+    setCurrentTimer(null);
   };
 
   const handleStop = () => {
@@ -132,21 +142,23 @@ const App = () => {
     setState(null);
   };
 
-  const handlePause = () => {
-    stopTimer();
-  };
-
-  const handleResume = () => {
-    ensureTimer();
-  };
+  // const handlePause = () => {
+  //   stopTimer();
+  // };
+  //
+  // const handleResume = () => {
+  //   ensureTimer();
+  // };
 
   const handleStart = () => {
     setState(selectExercise(0));
   };
 
   const handleNext = () => {
-    if (state && state.index < plan.exercises.length - 1) {
-      selectExercise(state.index + 1);
+    if (!state) return;
+
+    if (state.index < plan.exercises.length - 1) {
+      setState(selectExercise(state.index + 1));
     }
   };
 
@@ -154,8 +166,8 @@ const App = () => {
     <div className="app">
       <ControlButtons
         onStop={handleStop}
-        onPause={handlePause}
-        onResume={handleResume}
+        // onPause={handlePause}
+        // onResume={handleResume}
         onStart={handleStart}
         onNext={handleNext}
       />

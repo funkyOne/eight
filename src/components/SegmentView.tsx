@@ -11,7 +11,7 @@ interface SegmentViewProps {
 
 const SegmentView = ({ current, index, segment }: SegmentViewProps) => {
   const isActive = index === current;
-  const segmentIcon = segment.type === "e" ? "🟢" : "⚪";
+  const segmentIcon = segment.type === "w" ? "🟢" : "⚪";
 
   return <span className={`segment ${isActive ? "active" : ""}`}>{segmentIcon}</span>;
 };

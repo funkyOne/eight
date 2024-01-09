@@ -15,7 +15,7 @@ export function ExerciseView({ exercise, timeline, currentSegmentIndex, elapsed 
   return (
     <div className="exercise-view">
       <div className="exercise-info">
-        <div>Exercise: {exercise.name}</div>
+        <h1>{exercise.name}</h1>
         {/*<div>Duration: {exercise.duration}</div>*/}
         {/*<div>Segment: {currentSegmentIndex + 1}/{timeline.length}</div>*/}
       </div>
