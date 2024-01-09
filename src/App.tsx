@@ -5,15 +5,30 @@ import { ControlButtons } from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak } from "./utils/speechSynthesis";
 
-const restSound = new Audio('/src/assets/220174__gameaudio__spacey-loose.wav');
-const workSound = new Audio('/src/assets/220202__gameaudio__teleport-casual.wav');
+let restSound: HTMLAudioElement | undefined;
+let workSound: HTMLAudioElement | undefined;
+let soundEnabled = false;
+
+function ensureAudio() {
+  // only run this on the client
+  if (typeof window === 'undefined') return;
+
+  if (soundEnabled) return; // already initialised
+
+  restSound = new Audio('./sounds/220174__gameaudio__spacey-loose.wav');
+  workSound = new Audio('./sounds/220202__gameaudio__teleport-casual.wav');
+  restSound.load();
+  workSound.load();
+
+  soundEnabled = true;
+}
 
 // Mock data for demonstration
 const plan: Plan = {
   name: "Eye exercises",
   exercises: [
-    // { name: "Blink often", duration: 60, repetitions: 1 },
-    { name: "Blink often", duration: 5, repetitions: 1 },
+    { name: "Blink often", duration: 60, repetitions: 1 },
+    // { name: "Blink often", duration: 5, repetitions: 1 },
     { name: "Blinking slow", duration: 3, rest: 3, repetitions: 10 },
     { name: "Head Movement clockwise", duration: 15, repetitions: 1 },
     { name: "Head Movement counterclockwise", duration: 15, repetitions: 1 },
@@ -104,9 +119,11 @@ const App = () => {
         // Check if there are more segments in the current exercise
         if (nextSegmentIndex < timeline.length) {
 
-          if (timeline[nextSegmentIndex].type === 'r') {
+          if (soundEnabled && timeline[nextSegmentIndex].type === 'r') {
+            restSound.currentTime = 0; // Reset the sound for Safari
             void restSound.play(); // Play the rest sound
           } else {
+            workSound.currentTime = 0; // Reset the sound for Safari
             void workSound.play(); // Play the work sound
           }
 
@@ -151,6 +168,7 @@ const App = () => {
   // };
 
   const handleStart = () => {
+    ensureAudio();
     setState(selectExercise(0));
   };
 

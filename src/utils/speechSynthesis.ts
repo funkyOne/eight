@@ -1,11 +1,17 @@
+let englishVoices: SpeechSynthesisVoice[] | null = null;
+
 export const speak = (text: string): void => {
   const utterance = new SpeechSynthesisUtterance(text);
-  const voices = window.speechSynthesis.getVoices();
 
-  // Example: Selecting a voice (modify as needed)
-  if (voices.length > 2) {
-    utterance.voice = voices[2]; // This is just an example, modify as needed
+  if (!englishVoices) {
+    const voices = window.speechSynthesis.getVoices();
+    englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
   }
 
+  if (englishVoices.length > 0) {
+    utterance.voice = englishVoices[0];
+  }
+
+  utterance.lang = 'en-GB';
   window.speechSynthesis.speak(utterance);
 };
