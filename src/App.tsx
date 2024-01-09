@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 
-import ExerciseView from "./components/ExerciseView";
+import { ExerciseView } from "./components/ExerciseView";
 import ControlButtons from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak, preloadSound } from "./utils/speechSynthesis";
@@ -24,33 +24,33 @@ const plan: Plan = {
     { name: "Eyes Shut Movements", duration: 60, repetitions: 1 },
     { name: "Change Focus", duration: 10, rest: 10, repetitions: 3 },
     { name: "Temple Massage", duration: 10, rest: 5, repetitions: 4 },
-    { name: "Eyes Palming", duration: 60, repetitions: 1 }
-  ]
+    { name: "Eyes Palming", duration: 60, repetitions: 1 },
+  ],
 };
 
 const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
   let segments: ExerciseSegment[] = [];
-  let startTime = 0;
+  let currentOffset = 0;
 
   for (let i = 0; i < exercise.repetitions; i++) {
     // Add exercise segment
     segments.push({
       type: "e", // 'e' for exercise
-      startTime: startTime,
-      endTime: startTime + exercise.duration * 1000,
-      duration: exercise.duration
+      startOffset: currentOffset,
+      endOffset: currentOffset + exercise.duration * 1000,
+      duration: exercise.duration,
     });
-    startTime += exercise.duration * 1000;
+    currentOffset += exercise.duration * 1000;
 
     // If there is a rest period, add it
     if (exercise.rest) {
       segments.push({
         type: "r", // 'r' for rest
-        startTime: startTime,
-        endTime: startTime + exercise.rest * 1000,
-        duration: exercise.rest
+        startOffset: currentOffset,
+        endOffset: currentOffset + exercise.rest * 1000,
+        duration: exercise.rest,
       });
-      startTime += exercise.rest * 1000;
+      currentOffset += exercise.rest * 1000;
     }
   }
 
@@ -61,49 +61,53 @@ const App = () => {
   const [state, setState] = useState<AppState | null>(null);
   const [currentTimer, setCurrentTimer] = useState<number | null>(null);
 
-  const selectExercise = (index: number) => {
+  function selectExercise(index: number) {
     const exercise = plan.exercises[index];
     const timeline = genExerciseSegments(exercise);
     const newState: AppState = {
       index,
+      segmentIndex: 0,
       timeline,
-      duration: exercise.duration,
-      currentSegment: 0,
-      startTime: Date.now(),
-      secondsElapsedInSegment: 0
+      startedAt: Date.now(), // Update the start time for the new exercise
+      secondsElapsedInSegment: 0,
     };
-    setState(newState);
     speak(exercise.name);
-    startTimer();
-  };
+    ensureTimer();
+    console.log(newState);
+    return newState;
+  }
 
-  const startTimer = () => {
-    stopTimer(); // Ensure any existing timer is stopped before starting a new one
+  const ensureTimer = () => {
+    if (currentTimer) return; // Timer already started
+
     const timerId = window.setInterval(() => {
-      setState(currentState => {
+      setState((currentState) => {
         if (!currentState) return null;
 
-        const { timeline, currentSegment: current, index, startTime } = currentState;
-        const segment = timeline[current];
+        const { timeline, segmentIndex, index, startedAt } = currentState;
+        const segment = timeline[segmentIndex];
 
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
 
-        if (Date.now() < startTime + segment.endTime) {
+        if (Date.now() < startedAt + segment.endOffset) {
+          console.log("No change in segment or exercise");
           // No change in segment or exercise
-          return {...currentState, secondsElapsedInSegment: elapsed};
+          return { ...currentState, secondsElapsedInSegment: elapsed };
         }
 
         // Check if the current segment's time is up
-        let newCurrent = current + 1;
+        let nextSegmentIndex = segmentIndex + 1;
 
         // Check if there are more segments in the current exercise
-        if (newCurrent < timeline.length) {
-          return { ...currentState, currentSegment: newCurrent, secondsElapsedInSegment: 0 };
+        if (nextSegmentIndex < timeline.length) {
+          console.log("Next segment");
+          return { ...currentState, segmentIndex: nextSegmentIndex, secondsElapsedInSegment: elapsed };
         } else {
+          console.log("Next exercise");
           // Move to the next exercise
           let newIndex = index + 1;
           if (newIndex < plan.exercises.length) {
-            selectExercise(newIndex);
+            return selectExercise(newIndex);
           } else {
             // End of the plan
             stopTimer();
@@ -112,6 +116,7 @@ const App = () => {
         }
       });
     }, 1000); // Check every second
+
     setCurrentTimer(timerId);
   };
 
@@ -132,11 +137,11 @@ const App = () => {
   };
 
   const handleResume = () => {
-    startTimer();
+    ensureTimer();
   };
 
   const handleStart = () => {
-    selectExercise(0);
+    setState(selectExercise(0));
   };
 
   const handleNext = () => {
@@ -158,7 +163,7 @@ const App = () => {
         <ExerciseView
           exercise={plan.exercises[state.index]}
           timeline={state.timeline}
-          currentSegmentIndex={state.currentSegment}
+          currentSegmentIndex={state.segmentIndex}
           elapsed={state.secondsElapsedInSegment}
         />
       )}

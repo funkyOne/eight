@@ -1,6 +1,6 @@
 // src/components/ControlButtons.tsx
 
-import { FunctionComponent } from 'preact';
+import { FunctionComponent } from "preact";
 
 interface ControlButtonsProps {
   onStop: () => void;
@@ -10,13 +10,7 @@ interface ControlButtonsProps {
   onNext: () => void;
 }
 
-const ControlButtons: FunctionComponent<ControlButtonsProps> = ({
-  onStop,
-  onPause,
-  onResume,
-  onStart,
-  onNext,
-}) => {
+const ControlButtons: FunctionComponent<ControlButtonsProps> = ({ onStop, onPause, onResume, onStart, onNext }) => {
   return (
     <div className="control-buttons">
       <button onClick={onStop}>STOP</button>

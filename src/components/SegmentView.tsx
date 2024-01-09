@@ -1,7 +1,7 @@
 // src/components/SegmentView.tsx
 
-import { FunctionComponent } from 'preact';
-import { ExerciseSegment } from '../types';
+import { FunctionComponent } from "preact";
+import { ExerciseSegment } from "../types";
 
 interface SegmentViewProps {
   current: number;
@@ -9,15 +9,11 @@ interface SegmentViewProps {
   segment: ExerciseSegment;
 }
 
-const SegmentView: FunctionComponent<SegmentViewProps> = ({ current, index, segment }) => {
+const SegmentView = ({ current, index, segment }: SegmentViewProps) => {
   const isActive = index === current;
-  const segmentIcon = segment.type === 'e' ? '🟢' : '⚪';
+  const segmentIcon = segment.type === "e" ? "🟢" : "⚪";
 
-  return (
-    <span className={`segment ${isActive ? 'active' : ''}`}>
-      {segmentIcon}
-    </span>
-  );
+  return <span className={`segment ${isActive ? "active" : ""}`}>{segmentIcon}</span>;
 };
 
 export default SegmentView;

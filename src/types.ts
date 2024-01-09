@@ -12,16 +12,15 @@ export interface Plan {
 
 export interface ExerciseSegment {
   type: "e" | "r"; // 'e' for exercise, 'r' for rest
-  startTime: number;
+  startOffset: number;
   duration: number;
-  endTime: number;
+  endOffset: number;
 }
 
 export interface AppState {
   index: number; // Current exercise index
+  segmentIndex: number; // Current segment index within the exercise
   timeline: ExerciseSegment[];
-  duration: number; // Total duration of the current exercise
-  currentSegment: number; // Current segment index within the exercise
-  startTime: number; // Start time of the current exercise
+  startedAt: number; // Start time of the current exercise
   secondsElapsedInSegment: number; // Elapsed time since the start of the current segment
 }
