@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 
 import { ExerciseView } from "./components/ExerciseView";
-import ControlButtons from "./components/ControlButtons";
+import { ControlButtons } from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak } from "./utils/speechSynthesis";
 
@@ -166,10 +166,9 @@ const App = () => {
     <div className="app">
       <ControlButtons
         onStop={handleStop}
-        // onPause={handlePause}
-        // onResume={handleResume}
         onStart={handleStart}
         onNext={handleNext}
+        isPlaying={state !== null}
       />
       {state && (
         <ExerciseView
