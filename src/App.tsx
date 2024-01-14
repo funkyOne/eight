@@ -4,24 +4,50 @@ import { ExerciseView } from "./components/ExerciseView";
 import { ControlButtons } from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak } from "./utils/speechSynthesis";
+import { load, SoundHandle } from "./utils/audio";
 
-let restSound: HTMLAudioElement | undefined;
-let workSound: HTMLAudioElement | undefined;
+let restSound: SoundHandle | undefined;
+let workSound: SoundHandle | undefined;
 let soundEnabled = false;
 
-function ensureAudio() {
+async function ensureAudio() {
   // only run this on the client
   if (typeof window === "undefined") return;
 
   if (soundEnabled) return; // already initialised
 
-  restSound = new Audio("./sounds/220174__gameaudio__spacey-loose.wav");
-  workSound = new Audio("./sounds/220202__gameaudio__teleport-casual.wav");
-  restSound.load();
-  workSound.load();
+  const [a, b] = await load([
+    "./sounds/220174__gameaudio__spacey-loose.wav",
+    "./sounds/220202__gameaudio__teleport-casual.wav",
+  ]);
+
+  restSound = a;
+  workSound = b;
 
   soundEnabled = true;
 }
+
+// todo only lock when exercise is running and unlock when it's done, also, only lock when app is active
+async function initWakeLock() {
+  if (typeof window === "undefined") return;
+
+  let wakeLock = null;
+
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    console.log("Wake Lock is active!");
+
+    document.addEventListener("visibilitychange", async () => {
+      if (wakeLock !== null && document.visibilityState === "visible") {
+        wakeLock = await navigator.wakeLock.request("screen");
+      }
+    });
+  } catch (err) {
+    console.log(`${err.name}, ${err.message}`);
+  }
+}
+
+void initWakeLock();
 
 // Mock data for demonstration
 const plan: Plan = {
@@ -119,11 +145,9 @@ const App = () => {
         // Check if there are more segments in the current exercise
         if (nextSegmentIndex < timeline.length) {
           if (soundEnabled && timeline[nextSegmentIndex].type === "r") {
-            restSound.currentTime = 0; // Reset the sound for Safari
-            void restSound.play(); // Play the rest sound
+            restSound.play();
           } else {
-            workSound.currentTime = 0; // Reset the sound for Safari
-            void workSound.play(); // Play the work sound
+            workSound.play();
           }
 
           console.log("Next segment");
@@ -167,7 +191,7 @@ const App = () => {
   // };
 
   const handleStart = () => {
-    ensureAudio();
+    void ensureAudio();
     setState(selectExercise(0));
   };
 
