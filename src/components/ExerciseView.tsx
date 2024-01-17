@@ -26,7 +26,14 @@ export function ExerciseView({ exercise, timeline, currentSegmentIndex, elapsed 
       <div className="exercise-timeline">
         {timeline.length > 1 && (
           <div className="exercise-timeline">
-            <SegmentedCircle segments={12} lengthA={0.7} lengthB={0.3} innerRadius={90} />
+            <SegmentedCircle
+              segments={timeline.map((s) => ({
+                color: s.type === "w" ? "green" : "blue",
+                length: s.duration,
+              }))}
+              innerRadius={90}
+              segmentMargin={0.01}
+            />
 
             {timeline.map((segment, index) => (
               <SegmentView key={index} current={currentSegmentIndex} index={index} segment={segment} />

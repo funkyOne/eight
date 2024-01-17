@@ -1,31 +1,39 @@
-interface SegmentedCircleProps {
-  segments: number;
-  lengthA: number; // Length of segment A
-  lengthB: number; // Length of segment B
-  innerRadius: number; // Radius of the inner circle (hole)
-  segmentMargin: number; // Margin between segments
+import { FunctionComponent } from "preact";
+
+interface Segment {
+  color: string;
+  length: number;
 }
 
-const SegmentedCircle = ({ segments, lengthA, lengthB, innerRadius, segmentMargin = 0.01 }: SegmentedCircleProps) => {
+interface SegmentedCircleProps {
+  segments: Segment[];
+  innerRadius: number; // Radius of the inner circle (hole)
+  segmentMargin: number; // Margin between segments in radians
+}
+
+const SegmentedCircle: FunctionComponent<SegmentedCircleProps> = ({ segments, innerRadius, segmentMargin }) => {
   const outerRadius = 100; // Radius of the outer circle
   const viewBoxSize = 220;
   const center = viewBoxSize / 2;
 
+  // Calculate the total relative length
+  const totalLength = segments.reduce((acc, segment) => acc + segment.length, 0);
+
   const drawSegment = (startAngle: number, endAngle: number, color: string) => {
-    // Adding margin to the start and end angles
-    startAngle += segmentMargin;
-    endAngle -= segmentMargin;
+    // Adjusting the start and end angles for segment margin
+    const adjustedStartAngle = startAngle + segmentMargin;
+    const adjustedEndAngle = endAngle - segmentMargin;
 
     const getCoordinates = (angle: number, radius: number) => ({
       x: center + radius * Math.cos(angle),
       y: center + radius * Math.sin(angle),
     });
 
-    const startOuter = getCoordinates(startAngle, outerRadius);
-    const endOuter = getCoordinates(endAngle, outerRadius);
-    const startInner = getCoordinates(startAngle, innerRadius);
-    const endInner = getCoordinates(endAngle, innerRadius);
-    const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+    const startOuter = getCoordinates(adjustedStartAngle, outerRadius);
+    const endOuter = getCoordinates(adjustedEndAngle, outerRadius);
+    const startInner = getCoordinates(adjustedStartAngle, innerRadius);
+    const endInner = getCoordinates(adjustedEndAngle, innerRadius);
+    const largeArcFlag = adjustedEndAngle - adjustedStartAngle > Math.PI ? 1 : 0;
 
     const pathData = [
       `M ${startOuter.x} ${startOuter.y}`,
@@ -40,10 +48,10 @@ const SegmentedCircle = ({ segments, lengthA, lengthB, innerRadius, segmentMargi
 
   const segmentsArray = [];
   let currentAngle = 0;
-  for (let i = 0; i < segments; i++) {
-    const segmentLength = i % 2 === 0 ? lengthA : lengthB;
-    const nextAngle = currentAngle + segmentLength * 2 * Math.PI;
-    segmentsArray.push(drawSegment(currentAngle, nextAngle, i % 2 === 0 ? "green" : "blue"));
+  for (let segment of segments) {
+    const segmentAngle = (segment.length / totalLength) * 2 * Math.PI;
+    const nextAngle = currentAngle + segmentAngle;
+    segmentsArray.push(drawSegment(currentAngle, nextAngle, segment.color));
     currentAngle = nextAngle;
   }
 
