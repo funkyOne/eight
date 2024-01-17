@@ -35,9 +35,9 @@ export default defineConfig({
         //   "theme_color": "#3367D6"
       },
       includeAssets: ["sounds/*.wav", "vite.svg"],
-      devOptions: {
-        enabled: true,
-      },
+      // devOptions: {
+      //   enabled: true,
+      // },
     }),
   ],
 });
