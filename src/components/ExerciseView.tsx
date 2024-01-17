@@ -3,6 +3,7 @@
 import { FunctionComponent } from "preact";
 import { Exercise, ExerciseSegment } from "../types";
 import SegmentView from "./SegmentView";
+import SegmentedCircle from "./SegmentedCircle";
 
 export interface ExerciseViewProps {
   exercise: Exercise;
@@ -25,6 +26,8 @@ export function ExerciseView({ exercise, timeline, currentSegmentIndex, elapsed 
       <div className="exercise-timeline">
         {timeline.length > 1 && (
           <div className="exercise-timeline">
+            <SegmentedCircle segments={12} lengthA={0.7} lengthB={0.3} innerRadius={90} />
+
             {timeline.map((segment, index) => (
               <SegmentView key={index} current={currentSegmentIndex} index={index} segment={segment} />
             ))}
