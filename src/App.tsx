@@ -11,6 +11,20 @@ let restSound: SoundHandle | undefined;
 let workSound: SoundHandle | undefined;
 let soundEnabled = false;
 
+// Step 1: Create an array of praise phrases
+const praisePhrases = [
+  "Good job!",
+  "Nice one, pal!",
+  "Well done, buddy!",
+  "You are the best",
+  "All done!",
+  "You've made it",
+  "Keep up the good work!",
+  "You're doing great!",
+  "Fantastic work!",
+  "Keep it up!",
+];
+
 async function ensureAudio() {
   // only run this on the client
   if (typeof window === "undefined") return;
@@ -102,6 +116,11 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
   return segments;
 };
 
+function speakPraise() {
+  const randomPhrase = praisePhrases[Math.floor(Math.random() * praisePhrases.length)];
+  speak(randomPhrase);
+}
+
 const App = () => {
   const [state, setState] = useState<AppState | null>(null);
   const [currentTimer, setCurrentTimer] = useState<number | null>(null);
@@ -162,6 +181,9 @@ const App = () => {
           } else {
             // End of the plan
             stopTimer();
+
+            speakPraise();
+
             return null;
           }
         }
