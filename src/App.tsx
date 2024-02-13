@@ -1,7 +1,5 @@
 import { useState } from "preact/hooks";
 
-import { ExerciseView } from "./components/ExerciseView";
-import { ControlButtons } from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak } from "./utils/speechSynthesis";
 import { load, SoundHandle } from "./utils/audio";
