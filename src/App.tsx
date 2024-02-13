@@ -224,6 +224,8 @@ const App = () => {
     }
   };
 
+  if (state === null) return "Loading...";
+
   const props = {
     exercise: plan.exercises[state.index],
     timeline: state.timeline,
