@@ -5,6 +5,7 @@ import { ControlButtons } from "./components/ControlButtons";
 import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
 import { speak } from "./utils/speechSynthesis";
 import { load, SoundHandle } from "./utils/audio";
+import AppView from "./components/AppView";
 
 let restSound: SoundHandle | undefined;
 let workSound: SoundHandle | undefined;
@@ -203,18 +204,22 @@ const App = () => {
     }
   };
 
+  const props = {
+    exercise: plan.exercises[state.index],
+    timeline: state.timeline,
+    currentSegmentIndex: state.segmentIndex,
+    elapsed: state.secondsElapsedInSegment,
+  };
+
   return (
-    <div className="app">
-      <ControlButtons onStop={handleStop} onStart={handleStart} onNext={handleNext} isPlaying={state !== null} />
-      {state && (
-        <ExerciseView
-          exercise={plan.exercises[state.index]}
-          timeline={state.timeline}
-          currentSegmentIndex={state.segmentIndex}
-          elapsed={state.secondsElapsedInSegment}
-        />
-      )}
-    </div>
+    <AppView
+      exercise={props}
+      state={state}
+      plan={plan}
+      handleStop={handleStop}
+      handleStart={handleStart}
+      handleNext={handleNext}
+    />
   );
 };
 

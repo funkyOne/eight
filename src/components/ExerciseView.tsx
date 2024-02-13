@@ -4,7 +4,7 @@ import { FunctionComponent } from "preact";
 import { Exercise, ExerciseSegment } from "../types";
 import SegmentView from "./SegmentView";
 
-interface ExerciseViewProps {
+export interface ExerciseViewProps {
   exercise: Exercise;
   timeline: ExerciseSegment[];
   currentSegmentIndex: number;
