@@ -5,14 +5,15 @@ export const speak = (text: string): void => {
 
   if (!englishVoices) {
     const voices = window.speechSynthesis.getVoices();
-    englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+    englishVoices = voices.filter((voice) => voice.lang.startsWith("en"));
   }
 
   if (englishVoices.length > 0) {
     utterance.voice = englishVoices[0];
   }
 
-  utterance.lang = 'en-GB';
+  utterance.lang = "en-GB";
+
   window.speechSynthesis.cancel(); // Cancel any previous utterances
   window.speechSynthesis.speak(utterance);
 };

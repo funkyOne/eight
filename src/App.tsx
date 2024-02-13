@@ -11,12 +11,12 @@ let soundEnabled = false;
 
 function ensureAudio() {
   // only run this on the client
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   if (soundEnabled) return; // already initialised
 
-  restSound = new Audio('./sounds/220174__gameaudio__spacey-loose.wav');
-  workSound = new Audio('./sounds/220202__gameaudio__teleport-casual.wav');
+  restSound = new Audio("./sounds/220174__gameaudio__spacey-loose.wav");
+  workSound = new Audio("./sounds/220202__gameaudio__teleport-casual.wav");
   restSound.load();
   workSound.load();
 
@@ -118,8 +118,7 @@ const App = () => {
 
         // Check if there are more segments in the current exercise
         if (nextSegmentIndex < timeline.length) {
-
-          if (soundEnabled && timeline[nextSegmentIndex].type === 'r') {
+          if (soundEnabled && timeline[nextSegmentIndex].type === "r") {
             restSound.currentTime = 0; // Reset the sound for Safari
             void restSound.play(); // Play the rest sound
           } else {
@@ -182,12 +181,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <ControlButtons
-        onStop={handleStop}
-        onStart={handleStart}
-        onNext={handleNext}
-        isPlaying={state !== null}
-      />
+      <ControlButtons onStop={handleStop} onStart={handleStart} onNext={handleNext} isPlaying={state !== null} />
       {state && (
         <ExerciseView
           exercise={plan.exercises[state.index]}
