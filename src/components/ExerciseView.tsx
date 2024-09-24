@@ -1,46 +1,21 @@
-// src/components/ExerciseView.tsx
-
-import { FunctionComponent } from "preact";
 import { Exercise, ExerciseSegment } from "../types";
-import SegmentView from "./SegmentView";
-import SegmentedCircle from "./SegmentedCircle";
+import { TimerCircle } from "./TimerCircle";
+import { SegmentIndicators } from "./SegmentIndicators";
 
 export interface ExerciseViewProps {
   exercise: Exercise;
   timeline: ExerciseSegment[];
   currentSegmentIndex: number;
   elapsed: number;
+  totalDuration: number;
 }
 
-export function ExerciseView({ exercise, timeline, currentSegmentIndex, elapsed }: ExerciseViewProps) {
+export function ExerciseView({ exercise, timeline, currentSegmentIndex, elapsed, totalDuration }: ExerciseViewProps) {
   return (
     <div className="exercise-view">
-      <div className="exercise-info">
-        <h1>{exercise.name}</h1>
-        {/*<div>Duration: {exercise.duration}</div>*/}
-        {/*<div>Segment: {currentSegmentIndex + 1}/{timeline.length}</div>*/}
-      </div>
-      <div className="exercise-timer">
-        <div className="exercise-timer__elapsed">{elapsed}</div>
-      </div>
-      <div className="exercise-timeline">
-        {timeline.length > 1 && (
-          <div className="exercise-timeline">
-            <SegmentedCircle
-              segments={timeline.map((s) => ({
-                color: s.type === "w" ? "green" : "blue",
-                length: s.duration,
-              }))}
-              innerRadius={90}
-              segmentMargin={0.01}
-            />
-
-            {timeline.map((segment, index) => (
-              <SegmentView key={index} current={currentSegmentIndex} index={index} segment={segment} />
-            ))}
-          </div>
-        )}
-      </div>
+      <h2 className="exercise-name">{exercise.name}</h2>
+      <TimerCircle elapsed={elapsed} totalDuration={totalDuration} />
+      <SegmentIndicators segments={timeline} currentIndex={currentSegmentIndex} />
     </div>
   );
 }

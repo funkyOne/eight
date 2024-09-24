@@ -1,6 +1,6 @@
 import { ExerciseView, ExerciseViewProps } from "./ExerciseView";
 import { ControlButtons } from "./ControlButtons";
-import { AppState, Exercise, ExerciseSegment, Plan } from "../types";
+import { ProgressBar } from "./ProgressBar";
 
 export interface AppViewProps {
   exercise: ExerciseViewProps;
@@ -8,13 +8,26 @@ export interface AppViewProps {
   handleStop: () => void;
   handleStart: () => void;
   handleNext: () => void;
+  progress: number;
 }
 
-const AppView = ({ exercise, handleStop, handleStart, handleNext }: AppViewProps) => {
+const AppView = ({ exercise, handleStop, handleStart, handleNext, progress }: AppViewProps) => {
   return (
     <div className="app">
-      <ControlButtons onStop={handleStop} onStart={handleStart} onNext={handleNext} isPlaying={exercise !== null} />
-      {exercise && <ExerciseView {...exercise} />}
+      <header className="app-header">
+        <h1>Eye Exercises</h1>
+      </header>
+      {exercise ? (
+        <>
+          <ExerciseView {...exercise} />
+          <ControlButtons onStop={handleStop} onNext={handleNext} />
+          <ProgressBar progress={progress} />
+        </>
+      ) : (
+        <button className="start-button" onClick={handleStart}>
+          START
+        </button>
+      )}
     </div>
   );
 };

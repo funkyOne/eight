@@ -1,27 +1,14 @@
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 
-import { Plan, AppState, Exercise, ExerciseSegment } from "./types";
-import { speak } from "./utils/speechSynthesis";
+import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
+import { speak, speakPraise } from "./utils/speech";
 import { load, SoundHandle } from "./utils/audio";
 import AppView from "./components/AppView";
+import { useWakeLock } from "./hooks/useWakeLock";
 
 let restSound: SoundHandle | undefined;
 let workSound: SoundHandle | undefined;
 let soundEnabled = false;
-
-// Step 1: Create an array of praise phrases
-const praisePhrases = [
-  "Good job!",
-  "Nice one, pal!",
-  "Well done, buddy!",
-  "You are the best",
-  "All done!",
-  "You've made it",
-  "Keep up the good work!",
-  "You're doing great!",
-  "Fantastic work!",
-  "Keep it up!",
-];
 
 async function ensureAudio() {
   // only run this on the client
@@ -40,35 +27,11 @@ async function ensureAudio() {
   soundEnabled = true;
 }
 
-// todo only lock when exercise is running and unlock when it's done, also, only lock when app is active
-async function initWakeLock() {
-  if (typeof window === "undefined") return;
-
-  let wakeLock = null;
-
-  try {
-    wakeLock = await navigator.wakeLock.request("screen");
-    console.log("Wake Lock is active!");
-
-    document.addEventListener("visibilitychange", async () => {
-      if (wakeLock !== null && document.visibilityState === "visible") {
-        wakeLock = await navigator.wakeLock.request("screen");
-      }
-    });
-  } catch (err) {
-    console.log(`${err.name}, ${err.message}`);
-  }
-}
-
-void initWakeLock();
-
-// Mock data for demonstration
 const plan: Plan = {
   name: "Eye exercises",
   exercises: [
     { name: "Blink often", duration: 60, repetitions: 1 },
-    // { name: "Blink often", duration: 5, repetitions: 1 },
-    { name: "Blinking slow", duration: 3, rest: 3, repetitions: 10 },
+    { name: "Blink slowly", duration: 3, rest: 3, repetitions: 10 },
     { name: "Head Movement clockwise", duration: 15, repetitions: 1 },
     { name: "Head Movement counterclockwise", duration: 15, repetitions: 1 },
     { name: "Head Movement side to side", duration: 15, repetitions: 1 },
@@ -79,7 +42,7 @@ const plan: Plan = {
     { name: "Eye Movement - random direction", duration: 30, repetitions: 1 },
     { name: "Squeezing Eyes Shut", duration: 3, rest: 3, repetitions: 10 },
     { name: "Eyes Shut Movements", duration: 60, repetitions: 1 },
-    { name: "Change Focus", duration: 10, rest: 10, repetitions: 3 },
+    { name: "Change Focus", duration: 10, rest: 10, repetitions: 5 },
     { name: "Temple Massage", duration: 10, rest: 5, repetitions: 4 },
     { name: "Eyes Palming", duration: 60, repetitions: 1 },
   ],
@@ -114,14 +77,11 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
   return segments;
 };
 
-function speakPraise() {
-  const randomPhrase = praisePhrases[Math.floor(Math.random() * praisePhrases.length)];
-  speak(randomPhrase);
-}
-
 const App = () => {
   const [state, setState] = useState<AppState | null>(null);
   const [currentTimer, setCurrentTimer] = useState<number | null>(null);
+
+  const { requestWakeLock, releaseWakeLock } = useWakeLock();
 
   function selectExercise(index: number) {
     const exercise = plan.exercises[index];
@@ -198,22 +158,16 @@ const App = () => {
     setCurrentTimer(null);
   };
 
-  const handleStop = () => {
-    stopTimer();
-    setState(null);
-  };
-
-  // const handlePause = () => {
-  //   stopTimer();
-  // };
-  //
-  // const handleResume = () => {
-  //   ensureTimer();
-  // };
-
   const handleStart = () => {
     void ensureAudio();
     setState(selectExercise(0));
+    void requestWakeLock();
+  };
+
+  const handleStop = () => {
+    stopTimer();
+    setState(null);
+    releaseWakeLock();
   };
 
   const handleNext = () => {
@@ -224,23 +178,39 @@ const App = () => {
     }
   };
 
-  if (state === null) return "Loading...";
+  const exercise = useMemo(() => {
+    if (state == null) return null;
 
-  const props = {
-    exercise: plan.exercises[state.index],
-    timeline: state.timeline,
-    currentSegmentIndex: state.segmentIndex,
-    elapsed: state.secondsElapsedInSegment,
-  };
+    const currentExercise = plan.exercises[state.index];
+    const totalDuration = state.timeline.reduce((total, segment) => total + segment.duration, 0);
+
+    return {
+      exercise: currentExercise,
+      timeline: state.timeline,
+      currentSegmentIndex: state.segmentIndex,
+      elapsed: state.secondsElapsedInSegment,
+      totalDuration,
+    };
+  }, [state]);
+
+  const progress = useMemo(() => {
+    if (state == null) return 0;
+
+    const totalExercises = plan.exercises.length;
+    const completedExercises = state.index;
+    const currentExerciseProgress =
+      state.secondsElapsedInSegment / state.timeline.reduce((total, segment) => total + segment.duration, 0);
+
+    return (completedExercises + currentExerciseProgress) / totalExercises;
+  }, [state, plan.exercises.length]);
 
   return (
     <AppView
-      exercise={props}
-      state={state}
-      plan={plan}
+      exercise={exercise}
       handleStop={handleStop}
       handleStart={handleStart}
       handleNext={handleNext}
+      progress={progress}
     />
   );
 };
