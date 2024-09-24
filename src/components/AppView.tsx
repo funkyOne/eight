@@ -14,9 +14,6 @@ export interface AppViewProps {
 const AppView = ({ exercise, handleStop, handleStart, handleNext, progress }: AppViewProps) => {
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Eye Exercises</h1>
-      </header>
       {exercise ? (
         <>
           <ExerciseView {...exercise} />
@@ -24,9 +21,15 @@ const AppView = ({ exercise, handleStop, handleStart, handleNext, progress }: Ap
           <ProgressBar progress={progress} />
         </>
       ) : (
-        <button className="start-button" onClick={handleStart}>
-          START
-        </button>
+        <>
+          <header className="app-header">
+            <h1>Eye exercises</h1>
+          </header>
+
+          <button className="start-button" onClick={handleStart}>
+            START
+          </button>
+        </>
       )}
     </div>
   );

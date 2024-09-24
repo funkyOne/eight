@@ -20,13 +20,13 @@ export function TimerCircle({ elapsed, totalDuration }: TimerCircleProps) {
   return (
     <div className="timer-circle">
       <svg viewBox="0 0 220 220" width="220" height="220">
-        <circle cx="110" cy="110" r={radius} fill="none" stroke="#3498db" strokeWidth="20" />
+        <circle cx="110" cy="110" r={radius} fill="none" stroke="var(--tertiary-color)" strokeWidth="20" />
         <circle
           cx="110"
           cy="110"
           r={radius}
           fill="none"
-          stroke="#2ecc71"
+          stroke="var(--primary-color)"
           strokeWidth="20"
           strokeDasharray={circleCircumference}
           strokeDashoffset={offset}

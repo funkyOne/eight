@@ -11,8 +11,7 @@ export function SegmentIndicators({ segments, currentIndex }: SegmentIndicatorsP
       {segments.map((segment, index) => (
         <div
           key={index}
-          className={`segment-indicator ${index === currentIndex ? "active" : ""}`}
-          style={{ backgroundColor: segment.type === "w" ? "#2ecc71" : "#3498db" }}
+          className={`segment-indicator ${index === currentIndex ? "active" : ""} segment-indicator--${segment.type}`}
         />
       ))}
     </div>
