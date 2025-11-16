@@ -7,10 +7,10 @@ export function ControlButtons({ onStop, onNext }: ControlButtonsProps) {
   return (
     <div className="control-buttons">
       <button className="stop-button" onClick={onStop}>
-        STOP
+        Stop
       </button>
       <button className="next-button" onClick={onNext}>
-        NEXT
+        Next
       </button>
     </div>
   );

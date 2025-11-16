@@ -23,12 +23,13 @@ const AppView = ({ exercise, handleStop, handleStart, handleNext, progress }: Ap
       ) : (
         <>
           <header className="app-header">
-            <h1>Eye exercises</h1>
+            <h1>Eye Exercise</h1>
           </header>
-
-          <button className="start-button" onClick={handleStart}>
-            START
-          </button>
+          <div className="start-button-container">
+            <button className="start-button" onClick={handleStart}>
+              Start Workout
+            </button>
+          </div>
         </>
       )}
     </div>

@@ -1,7 +1,7 @@
-import '@testing-library/jest-dom';
-import { expect, afterEach } from 'vitest';
-import { cleanup } from '@testing-library/preact';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import "@testing-library/jest-dom";
+import { expect, afterEach } from "vitest";
+import { cleanup } from "@testing-library/preact";
+import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Add custom matchers
 expect.extend(matchers as any);
@@ -9,4 +9,4 @@ expect.extend(matchers as any);
 // Clean up after each test
 afterEach(() => {
   cleanup();
-}); 
+});

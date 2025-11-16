@@ -1,177 +1,416 @@
+/* ========================================
+   Apple Design System Tokens
+   ======================================== */
+
 :root {
-    --background-color: #475C7A;
-    --primary-color: #FCBB6D;
-    --secondary-color: #D8737F;
-    --tertiary-color: #AB6C82;
-    --text-color: white;
-    --light-text-color: white;
-    --dark-accent: #685D79;
+  /* Typography Scale (iOS) */
+  --font-size-largeTitle: 34px;
+  --font-size-title1: 28px;
+  --font-size-title2: 22px;
+  --font-size-title3: 20px;
+  --font-size-headline: 17px;
+  --font-size-body: 17px;
+  --font-size-callout: 16px;
+  --font-size-subheadline: 15px;
+  --font-size-footnote: 13px;
+  --font-size-caption1: 12px;
+
+  /* Spacing Scale (4px grid) */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+
+  /* Animation Easing */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Light Mode Colors */
+  --color-label: rgba(0, 0, 0, 0.85);
+  --color-secondaryLabel: rgba(0, 0, 0, 0.55);
+  --color-tertiaryLabel: rgba(0, 0, 0, 0.35);
+
+  --color-fill: rgba(120, 120, 128, 0.2);
+  --color-secondaryFill: rgba(120, 120, 128, 0.16);
+  --color-tertiaryFill: rgba(120, 120, 128, 0.12);
+
+  --color-separator: rgba(60, 60, 67, 0.36);
+  --color-background: #ffffff;
+  --color-secondaryBackground: #f2f2f7;
+  --color-tertiaryBackground: #ffffff;
+
+  /* Semantic Colors */
+  --color-blue: #007aff;
+  --color-green: #34c759;
+  --color-red: #ff3b30;
+  --color-orange: #ff9500;
+  --color-yellow: #ffcc00;
+  --color-purple: #af52de;
+  --color-teal: #5ac8fa;
+  --color-pink: #ff2d55;
+
+  /* Component-specific */
+  --primary-color: var(--color-blue);
+  --destructive-color: var(--color-red);
+  --timer-color: var(--color-teal);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode Colors */
+    --color-label: rgba(255, 255, 255, 0.85);
+    --color-secondaryLabel: rgba(255, 255, 255, 0.55);
+    --color-tertiaryLabel: rgba(255, 255, 255, 0.35);
+
+    --color-fill: rgba(120, 120, 128, 0.36);
+    --color-secondaryFill: rgba(120, 120, 128, 0.32);
+    --color-tertiaryFill: rgba(120, 120, 128, 0.24);
+
+    --color-separator: rgba(84, 84, 88, 0.65);
+    --color-background: #000000;
+    --color-secondaryBackground: #1c1c1e;
+    --color-tertiaryBackground: #2c2c2e;
+  }
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-label);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
+
+/* ========================================
+   Layout
+   ======================================== */
 
 .app {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  display: flex;
+  flex-direction: column;
+
+  /* iOS safe areas */
+  padding-top: max(var(--space-20), env(safe-area-inset-top));
+  padding-right: max(var(--space-16), env(safe-area-inset-right));
+  padding-bottom: max(var(--space-20), env(safe-area-inset-bottom));
+  padding-left: max(var(--space-16), env(safe-area-inset-left));
 }
 
+/* ========================================
+   Header
+   ======================================== */
+
 .app-header {
-    background-color: var(--dark-accent);
-    color: var(--text-color);
-    padding: 10px 20px;
-    text-align: center;
-    border-radius: 10px;
-    margin-bottom: 20px;
+  background-color: var(--color-secondaryBackground);
+  color: var(--color-label);
+  padding: var(--space-16) var(--space-20);
+  text-align: center;
+  border-radius: 12px;
+  margin-bottom: var(--space-24);
+}
+
+.app-header h1 {
+  font-size: var(--font-size-largeTitle);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    border: 0.5px solid var(--color-separator);
+  }
+}
+
+/* ========================================
+   Exercise View
+   ======================================== */
+
+.exercise-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-32);
+  padding: var(--space-20) 0;
 }
 
 .exercise-name {
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--text-color);
-    font-size: 24px;
+  text-align: center;
+  margin: 0;
+  color: var(--color-label);
+  font-size: var(--font-size-title1);
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0 var(--space-16);
 }
 
+/* ========================================
+   Timer Circle
+   ======================================== */
+
 .timer-circle {
-    position: relative;
-    width: 220px;
-    height: 220px;
-    margin: 0 auto;
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 0 auto;
 }
 
 .timer-circle svg {
-    position: absolute;
-    top: 0;
-    left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.timer-circle circle {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s var(--ease-standard);
 }
 
 .timer-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
 .timer-text .seconds {
-    display: block;
-    font-size: 48px;
-    font-weight: bold;
-    color: var(--primary-color);
-    line-height: 1;
+  display: block;
+  font-size: 64px;
+  font-weight: 600;
+  color: var(--timer-color);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .timer-text .label {
-    display: block;
-    font-size: 18px;
-    color: var(--light-text-color);
-    margin-top: 5px;
+  display: block;
+  font-size: var(--font-size-headline);
+  font-weight: 500;
+  color: var(--color-secondaryLabel);
+  margin-top: var(--space-8);
 }
 
+/* ========================================
+   Segment Indicators
+   ======================================== */
+
 .segment-indicators {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding: 0 var(--space-16);
 }
 
 .segment-indicator {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    margin: 0 5px;
-    opacity: 0.4;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0.3;
+  transition: all 0.2s var(--ease-out);
 }
 
 .segment-indicator--w {
-    background-color: var(--primary-color);
+  background-color: var(--timer-color);
 }
 
 .segment-indicator--r {
-    background-color: var(--secondary-color);
+  background-color: var(--color-orange);
 }
 
 .segment-indicator.active {
-    transform: scale(1.5);
-    opacity: 1;
+  transform: scale(1.4);
+  opacity: 1;
 }
 
+/* ========================================
+   Buttons
+   ======================================== */
 
-.control-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
+button {
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-.control-buttons button {
-    padding: 10px 30px;
-    border: none;
-    border-radius: 25px;
-    color: var(--text-color);
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-
-.stop-button {
-    background-color: var(--secondary-color);
-}
-
-.next-button {
-    background-color: var(--primary-color);
-}
-
-.control-buttons button:hover {
-    opacity: 0.9;
-}
-
-.control-buttons button:active {
-    transform: scale(0.98);
-}
-
-.progress-bar {
-    height: 10px;
-    background-color: var(--dark-accent);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-bar-inner {
-    height: 100%;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease;
-}
-
-.start-button-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
+/* Primary Button (Start) */
 .start-button {
-    padding: 15px 40px;
-    font-size: 24px;
-    background-color: var(--primary-color);
-    color: var(--background-color);
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 32px;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  min-height: 50px;
+  min-width: 200px;
+  transition:
+    opacity 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+  box-shadow: none;
 }
 
 .start-button:hover {
-    background-color: var(--secondary-color);
+  opacity: 0.8;
 }
 
 .start-button:active {
-    transform: scale(0.98);
+  opacity: 0.5;
+  transform: scale(0.96);
+}
+
+/* Start button container - centers the button */
+.start-button-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Control Buttons Container */
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-12);
+  margin-bottom: var(--space-20);
+  padding: 0 var(--space-16);
+}
+
+.control-buttons button {
+  flex: 1;
+  max-width: 180px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  min-height: 48px;
+  transition:
+    opacity 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+}
+
+.control-buttons button:hover {
+  opacity: 0.8;
+}
+
+.control-buttons button:active {
+  opacity: 0.5;
+  transform: scale(0.96);
+}
+
+.stop-button {
+  background-color: var(--destructive-color);
+  color: white;
+}
+
+.next-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* ========================================
+   Progress Bar
+   ======================================== */
+
+.progress-bar {
+  height: 4px;
+  background-color: var(--color-tertiaryFill);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 var(--space-16);
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.3s var(--ease-standard);
+  border-radius: 2px;
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Ensure minimum touch targets */
+@media (pointer: coarse) {
+  button {
+    min-height: 44px;
+  }
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+
+@media (max-width: 375px) {
+  .timer-circle {
+    width: 200px;
+    height: 200px;
+  }
+
+  .timer-text .seconds {
+    font-size: 56px;
+  }
+
+  .exercise-name {
+    font-size: var(--font-size-title2);
+  }
+}
+
+@media (min-width: 768px) {
+  .control-buttons {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
