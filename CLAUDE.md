@@ -116,3 +116,333 @@ App (state + timer logic)
 - Audio context and speech must be initialized after user interaction (browser autoplay policy)
 - `ensureAudio()` is called on first "Start" button click
 - Check `typeof window === "undefined"` for SSR compatibility (prerendering)
+
+## Apple Design Style Guide
+
+This app is primarily used on iOS devices as a PWA. All UI should follow Apple's Human Interface Guidelines to create a native, polished experience.
+
+### Typography
+
+**Font Family:**
+- Use system font stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif`
+- This automatically uses SF Pro on Apple devices and falls back gracefully on other platforms
+- Never use custom web fonts for body text (maintain native feel and performance)
+
+**Type Scale:**
+```css
+--font-size-largeTitle: 34px;  /* Page titles, major headings */
+--font-size-title1: 28px;      /* Section headers */
+--font-size-title2: 22px;      /* Subsection headers */
+--font-size-title3: 20px;      /* Group headers */
+--font-size-headline: 17px;    /* Emphasized content */
+--font-size-body: 17px;        /* Body text, buttons */
+--font-size-callout: 16px;     /* Secondary body text */
+--font-size-subheadline: 15px; /* Tertiary content */
+--font-size-footnote: 13px;    /* Captions, footnotes */
+--font-size-caption1: 12px;    /* Additional info */
+--font-size-caption2: 11px;    /* Legal text */
+```
+
+**Font Weights:**
+- Regular: 400
+- Medium: 500 (for emphasized body text)
+- Semibold: 600 (for buttons, labels)
+- Bold: 700 (for headings only, use sparingly)
+
+**Line Heights:**
+- Use 1.2-1.3 for headlines
+- Use 1.4-1.5 for body text
+- Maintain comfortable reading rhythm
+
+### Colors
+
+**System Colors (Light Mode):**
+```css
+--color-label: rgba(0, 0, 0, 0.85);           /* Primary text */
+--color-secondaryLabel: rgba(0, 0, 0, 0.55);  /* Secondary text */
+--color-tertiaryLabel: rgba(0, 0, 0, 0.35);   /* Tertiary text */
+--color-quaternaryLabel: rgba(0, 0, 0, 0.18); /* Watermark text */
+
+--color-fill: rgba(120, 120, 128, 0.20);      /* Button fills */
+--color-secondaryFill: rgba(120, 120, 128, 0.16);
+--color-tertiaryFill: rgba(120, 120, 128, 0.12);
+
+--color-separator: rgba(60, 60, 67, 0.36);    /* Divider lines */
+--color-background: #FFFFFF;                  /* Primary background */
+--color-secondaryBackground: #F2F2F7;         /* Grouped backgrounds */
+--color-tertiaryBackground: #FFFFFF;          /* Grouped table rows */
+```
+
+**System Colors (Dark Mode):**
+```css
+--color-label: rgba(255, 255, 255, 0.85);
+--color-secondaryLabel: rgba(255, 255, 255, 0.55);
+--color-tertiaryLabel: rgba(255, 255, 255, 0.35);
+--color-quaternaryLabel: rgba(255, 255, 255, 0.18);
+
+--color-fill: rgba(120, 120, 128, 0.36);
+--color-secondaryFill: rgba(120, 120, 128, 0.32);
+--color-tertiaryFill: rgba(120, 120, 128, 0.24);
+
+--color-separator: rgba(84, 84, 88, 0.65);
+--color-background: #000000;
+--color-secondaryBackground: #1C1C1E;
+--color-tertiaryBackground: #2C2C2E;
+```
+
+**Semantic Colors:**
+```css
+--color-blue: #007AFF;        /* Primary actions, links */
+--color-green: #34C759;       /* Success, positive actions */
+--color-indigo: #5856D6;      /* Alternative accent */
+--color-orange: #FF9500;      /* Warnings */
+--color-pink: #FF2D55;        /* Destructive actions */
+--color-purple: #AF52DE;      /* Creative actions */
+--color-red: #FF3B30;         /* Errors, destructive */
+--color-teal: #5AC8FA;        /* Active states */
+--color-yellow: #FFCC00;      /* Attention */
+```
+
+**Usage Guidelines:**
+- Use `--color-blue` for primary action buttons (Start, Next)
+- Use `--color-red` for destructive actions (Stop)
+- Use semantic colors consistently (don't use red for success)
+- Ensure 4.5:1 contrast ratio for text (WCAG AA)
+- Ensure 3:1 contrast ratio for interactive elements
+
+### Spacing & Layout
+
+**Spacing Scale:**
+```css
+--space-4: 4px;    /* Minimal spacing */
+--space-8: 8px;    /* Tight spacing */
+--space-12: 12px;  /* Compact spacing */
+--space-16: 16px;  /* Standard spacing */
+--space-20: 20px;  /* Comfortable spacing */
+--space-24: 24px;  /* Section spacing */
+--space-32: 32px;  /* Large spacing */
+--space-40: 40px;  /* Extra large spacing */
+--space-48: 48px;  /* Major section spacing */
+```
+
+**Layout Guidelines:**
+- Use 16px (--space-16) as the default page margin on mobile
+- Use 20px (--space-20) for spacing between major UI sections
+- Use 8px (--space-8) for spacing within component groups
+- Max content width: 600px (centered on larger screens)
+- Respect safe areas (especially iPhone notch and home indicator)
+
+**Safe Areas:**
+```css
+/* Account for iOS safe areas */
+padding-top: env(safe-area-inset-top);
+padding-right: env(safe-area-inset-right);
+padding-bottom: env(safe-area-inset-bottom);
+padding-left: env(safe-area-inset-left);
+```
+
+### Components
+
+**Buttons:**
+
+*Primary Button (Filled):*
+```css
+background: var(--color-blue);
+color: white;
+border: none;
+border-radius: 10px; /* iOS uses 10px for standard buttons */
+padding: 12px 20px;
+font-size: 17px;
+font-weight: 600;
+min-height: 44px; /* Minimum touch target */
+transition: opacity 0.2s ease;
+```
+
+*Destructive Button:*
+```css
+background: var(--color-red);
+/* Same properties as primary */
+```
+
+*Secondary Button (Tinted):*
+```css
+background: rgba(0, 122, 255, 0.15); /* Tinted fill */
+color: var(--color-blue);
+/* Same structure as primary */
+```
+
+**Button States:**
+- Hover: `opacity: 0.8`
+- Active/Pressed: `opacity: 0.5` with 0.2s transition
+- Disabled: `opacity: 0.3` and `cursor: not-allowed`
+
+**Cards & Containers:**
+```css
+background: var(--color-secondaryBackground);
+border-radius: 12px; /* iOS uses 12px for cards */
+padding: 16px;
+box-shadow: none; /* iOS rarely uses shadows in light mode */
+```
+
+**Dark Mode Cards:**
+```css
+background: var(--color-secondaryBackground);
+/* Subtle border in dark mode for definition */
+border: 0.5px solid var(--color-separator);
+```
+
+**Progress Indicators:**
+- Use continuous animations (no steps)
+- Height: 4px for thin bars, 8px for standard
+- Border radius: Full (50% of height)
+- Color: `--color-blue` or semantic color
+- Background: `--color-tertiaryFill`
+
+**Circular Progress:**
+- Use SF Symbols style circular indicators
+- Stroke width: 4-6px
+- Cap: round
+- Animate with easing: `cubic-bezier(0.4, 0.0, 0.2, 1)`
+
+### Animations & Transitions
+
+**Timing Functions:**
+```css
+--ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);     /* Standard easing */
+--ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);        /* Deceleration */
+--ease-in: cubic-bezier(0.4, 0.0, 1.0, 1.0);       /* Acceleration */
+--ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1); /* Natural motion */
+```
+
+**Duration Guidelines:**
+- Micro-interactions (button press): 100-200ms
+- UI element transitions: 200-300ms
+- View transitions: 300-400ms
+- Complex animations: 400-600ms
+- Never exceed 600ms (feels sluggish)
+
+**Animation Principles:**
+- Use subtle, purposeful motion
+- Prefer opacity and transform over position changes
+- Respect `prefers-reduced-motion` media query
+- Avoid animating width/height (use scale instead)
+
+**Example:**
+```css
+button {
+  transition: opacity 0.2s var(--ease-out),
+              transform 0.2s var(--ease-out);
+}
+
+button:active {
+  opacity: 0.5;
+  transform: scale(0.96);
+}
+```
+
+### Accessibility
+
+**Touch Targets:**
+- Minimum: 44×44px (Apple requirement)
+- Preferred: 48×48px for primary actions
+- Ensure adequate spacing between targets (8px minimum)
+
+**Text Accessibility:**
+- Support Dynamic Type (respond to user font size preferences)
+- Maintain contrast ratios: 4.5:1 for text, 3:1 for UI elements
+- Use semantic HTML (`<button>`, `<header>`, etc.)
+
+**VoiceOver Support:**
+- Add `aria-label` for icon-only buttons
+- Use `role` attributes appropriately
+- Announce dynamic content changes with `aria-live`
+- Ensure focus order matches visual order
+
+**Reduced Motion:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Dark Mode
+
+**Implementation:**
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-label: rgba(255, 255, 255, 0.85);
+    --color-background: #000000;
+    /* ... other dark mode variables */
+  }
+}
+```
+
+**Guidelines:**
+- Support both light and dark modes
+- Use semantic color variables (not hardcoded colors)
+- Test all states in both modes
+- Avoid pure white (#FFFFFF) on pure black (#000000) - too harsh
+- Use elevated surfaces in dark mode (subtle borders/separators)
+
+### iOS-Specific Considerations
+
+**Status Bar:**
+```html
+<!-- In index.html -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- Use "black-translucent" for full-screen apps -->
+```
+
+**Viewport:**
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+```
+
+**Home Screen:**
+```html
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Eye Exercise">
+```
+
+**Haptic Feedback (if implementing via library):**
+- Light: For small UI changes
+- Medium: For warnings, moderate actions
+- Heavy: For errors, destructive actions
+
+**Scroll Behavior:**
+```css
+/* Smooth momentum scrolling on iOS */
+-webkit-overflow-scrolling: touch;
+overscroll-behavior: contain;
+```
+
+### Design Checklist
+
+When implementing or reviewing UI:
+
+- [ ] Uses system font stack (`-apple-system`, SF Pro)
+- [ ] Colors use CSS variables for light/dark mode
+- [ ] All touch targets are minimum 44×44px
+- [ ] Spacing follows 4px grid (4, 8, 12, 16, 20, 24, 32, 40, 48)
+- [ ] Border radius: 10px (buttons), 12px (cards)
+- [ ] Animations are subtle and respect `prefers-reduced-motion`
+- [ ] Safe areas are respected (notch, home indicator)
+- [ ] Contrast ratios meet WCAG AA (4.5:1 text, 3:1 UI)
+- [ ] Semantic colors used appropriately (blue=primary, red=destructive)
+- [ ] Interactive states defined (hover, active, disabled)
+- [ ] Focus states visible for keyboard navigation
+- [ ] aria-labels present for icon buttons
+- [ ] Works in both light and dark mode
+
+### References
+
+- [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/ios)
+- [SF Symbols](https://developer.apple.com/sf-symbols/)
+- [iOS Design Themes](https://developer.apple.com/design/human-interface-guidelines/ios/overview/themes/)
+- [Color Guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/)
+- [Typography Guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/typography/)
