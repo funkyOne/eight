@@ -4,7 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "",
+  base: process.env.GITHUB_ACTIONS ? "/eight-new/" : "",
   plugins: [
     preact({
       prerender: {
