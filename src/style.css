@@ -59,7 +59,6 @@
   /* Component-specific */
   --primary-color: var(--color-blue);
   --destructive-color: var(--color-red);
-  --timer-color: var(--color-teal);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -207,7 +206,7 @@ body {
   display: block;
   font-size: 64px;
   font-weight: 600;
-  color: var(--timer-color);
+  color: var(--color-label);
   line-height: 1;
   letter-spacing: -0.02em;
 }
@@ -234,23 +233,29 @@ body {
 }
 
 .segment-indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  opacity: 0.3;
+  opacity: 0.25;
   transition: all 0.2s var(--ease-out);
 }
 
+/* Work segments: filled circles */
 .segment-indicator--w {
-  background-color: var(--timer-color);
+  background-color: var(--color-label);
+  border: none;
 }
 
+/* Rest segments: outlined circles (rings) for differentiation through shape, not color */
 .segment-indicator--r {
-  background-color: var(--color-orange);
+  background-color: transparent;
+  border: 1.5px solid var(--color-label);
+  opacity: 0.3;
 }
 
+/* Active segment: higher opacity and larger scale */
 .segment-indicator.active {
-  transform: scale(1.4);
+  transform: scale(1.5);
   opacity: 1;
 }
 
@@ -331,14 +336,15 @@ button {
   transform: scale(0.96);
 }
 
+/* Both control buttons use neutral tinted style - equal visual weight */
 .stop-button {
-  background-color: var(--destructive-color);
-  color: white;
+  background-color: var(--color-fill);
+  color: var(--color-label);
 }
 
 .next-button {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--color-fill);
+  color: var(--color-label);
 }
 
 /* ========================================
