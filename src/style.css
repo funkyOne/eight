@@ -99,6 +99,13 @@ body {
   /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  /* Disable text selection for PWA experience */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none; /* Disable iOS callout menu */
 }
 
 /* ========================================
@@ -168,6 +175,11 @@ body {
   font-weight: 700;
   line-height: 1.2;
   padding: 0 var(--space-16);
+  /* Reserve space for two lines to prevent layout shift */
+  min-height: calc(var(--font-size-title1) * 1.2 * 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ========================================
@@ -410,6 +422,8 @@ button:focus-visible {
 
   .exercise-name {
     font-size: var(--font-size-title2);
+    /* Update min-height for smaller font size */
+    min-height: calc(var(--font-size-title2) * 1.2 * 2);
   }
 }
 
