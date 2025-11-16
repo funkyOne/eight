@@ -26,7 +26,7 @@ export function TimerCircle({ elapsed, totalDuration }: TimerCircleProps) {
           cy="120"
           r={radius}
           fill="none"
-          stroke="var(--timer-color)"
+          stroke="var(--color-label)"
           strokeWidth="6"
           strokeDasharray={circleCircumference}
           strokeDashoffset={offset}
