@@ -7,7 +7,7 @@ interface TimerCircleProps {
 
 export function TimerCircle({ elapsed, totalDuration }: TimerCircleProps) {
   const [offset, setOffset] = useState(0);
-  const radius = 95; // Slightly smaller to accommodate thicker stroke
+  const radius = 110; // Adjusted for 240x240 viewBox with 6px stroke
   const circleCircumference = 2 * Math.PI * radius;
 
   useEffect(() => {
@@ -19,18 +19,18 @@ export function TimerCircle({ elapsed, totalDuration }: TimerCircleProps) {
 
   return (
     <div className="timer-circle">
-      <svg viewBox="0 0 220 220" width="220" height="220">
-        <circle cx="110" cy="110" r={radius} fill="none" stroke="var(--tertiary-color)" strokeWidth="20" />
+      <svg viewBox="0 0 240 240" width="240" height="240">
+        <circle cx="120" cy="120" r={radius} fill="none" stroke="var(--color-tertiaryFill)" strokeWidth="6" />
         <circle
-          cx="110"
-          cy="110"
+          cx="120"
+          cy="120"
           r={radius}
           fill="none"
-          stroke="var(--primary-color)"
-          strokeWidth="20"
+          stroke="var(--timer-color)"
+          strokeWidth="6"
           strokeDasharray={circleCircumference}
           strokeDashoffset={offset}
-          transform="rotate(-90 110 110)"
+          transform="rotate(-90 120 120)"
         />
       </svg>
       <div className="timer-text">

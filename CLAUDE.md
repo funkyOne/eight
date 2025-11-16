@@ -42,12 +42,14 @@ yarn coverage
 The app uses a **timeline-based state machine** where exercises are broken down into segments (work/rest periods). State flows from `App.tsx` down through components:
 
 1. **App.tsx** - Main state container that:
+
    - Maintains `AppState` with current exercise index, segment index, and timeline
    - Runs a 1-second interval timer that checks if current segment is complete
    - Auto-advances through segments and exercises based on elapsed time
    - Manages audio (work/rest transition sounds) and speech synthesis
 
 2. **Timeline Generation** - `genExerciseSegments()` converts Exercise definitions into ExerciseSegment arrays:
+
    - Each segment has `type` ("w" for work, "r" for rest), `startOffset`, `endOffset`, and `duration`
    - For exercises with repetitions and rest periods, segments alternate between work and rest
    - Offsets are in milliseconds, durations in seconds
@@ -80,10 +82,12 @@ App (state + timer logic)
 ### Browser API Integration
 
 - **Wake Lock API**: `useWakeLock` hook prevents screen sleep during exercises
+
   - Supports both standard `navigator.wakeLock` and Firefox's `mozWakeLock`
   - Acquired on start, released on stop
 
 - **Web Audio API**: `utils/audio.ts` loads and plays WAV files
+
   - Uses AudioContext with unlock pattern for iOS/mobile compatibility
   - Sounds are lazily loaded on first user interaction via `ensureAudio()`
 
@@ -124,32 +128,36 @@ This app is primarily used on iOS devices as a PWA. All UI should follow Apple's
 ### Typography
 
 **Font Family:**
+
 - Use system font stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif`
 - This automatically uses SF Pro on Apple devices and falls back gracefully on other platforms
 - Never use custom web fonts for body text (maintain native feel and performance)
 
 **Type Scale:**
+
 ```css
---font-size-largeTitle: 34px;  /* Page titles, major headings */
---font-size-title1: 28px;      /* Section headers */
---font-size-title2: 22px;      /* Subsection headers */
---font-size-title3: 20px;      /* Group headers */
---font-size-headline: 17px;    /* Emphasized content */
---font-size-body: 17px;        /* Body text, buttons */
---font-size-callout: 16px;     /* Secondary body text */
+--font-size-largeTitle: 34px; /* Page titles, major headings */
+--font-size-title1: 28px; /* Section headers */
+--font-size-title2: 22px; /* Subsection headers */
+--font-size-title3: 20px; /* Group headers */
+--font-size-headline: 17px; /* Emphasized content */
+--font-size-body: 17px; /* Body text, buttons */
+--font-size-callout: 16px; /* Secondary body text */
 --font-size-subheadline: 15px; /* Tertiary content */
---font-size-footnote: 13px;    /* Captions, footnotes */
---font-size-caption1: 12px;    /* Additional info */
---font-size-caption2: 11px;    /* Legal text */
+--font-size-footnote: 13px; /* Captions, footnotes */
+--font-size-caption1: 12px; /* Additional info */
+--font-size-caption2: 11px; /* Legal text */
 ```
 
 **Font Weights:**
+
 - Regular: 400
 - Medium: 500 (for emphasized body text)
 - Semibold: 600 (for buttons, labels)
 - Bold: 700 (for headings only, use sparingly)
 
 **Line Heights:**
+
 - Use 1.2-1.3 for headlines
 - Use 1.4-1.5 for body text
 - Maintain comfortable reading rhythm
@@ -157,23 +165,25 @@ This app is primarily used on iOS devices as a PWA. All UI should follow Apple's
 ### Colors
 
 **System Colors (Light Mode):**
+
 ```css
---color-label: rgba(0, 0, 0, 0.85);           /* Primary text */
---color-secondaryLabel: rgba(0, 0, 0, 0.55);  /* Secondary text */
---color-tertiaryLabel: rgba(0, 0, 0, 0.35);   /* Tertiary text */
+--color-label: rgba(0, 0, 0, 0.85); /* Primary text */
+--color-secondaryLabel: rgba(0, 0, 0, 0.55); /* Secondary text */
+--color-tertiaryLabel: rgba(0, 0, 0, 0.35); /* Tertiary text */
 --color-quaternaryLabel: rgba(0, 0, 0, 0.18); /* Watermark text */
 
---color-fill: rgba(120, 120, 128, 0.20);      /* Button fills */
+--color-fill: rgba(120, 120, 128, 0.2); /* Button fills */
 --color-secondaryFill: rgba(120, 120, 128, 0.16);
 --color-tertiaryFill: rgba(120, 120, 128, 0.12);
 
---color-separator: rgba(60, 60, 67, 0.36);    /* Divider lines */
---color-background: #FFFFFF;                  /* Primary background */
---color-secondaryBackground: #F2F2F7;         /* Grouped backgrounds */
---color-tertiaryBackground: #FFFFFF;          /* Grouped table rows */
+--color-separator: rgba(60, 60, 67, 0.36); /* Divider lines */
+--color-background: #ffffff; /* Primary background */
+--color-secondaryBackground: #f2f2f7; /* Grouped backgrounds */
+--color-tertiaryBackground: #ffffff; /* Grouped table rows */
 ```
 
 **System Colors (Dark Mode):**
+
 ```css
 --color-label: rgba(255, 255, 255, 0.85);
 --color-secondaryLabel: rgba(255, 255, 255, 0.55);
@@ -186,24 +196,26 @@ This app is primarily used on iOS devices as a PWA. All UI should follow Apple's
 
 --color-separator: rgba(84, 84, 88, 0.65);
 --color-background: #000000;
---color-secondaryBackground: #1C1C1E;
---color-tertiaryBackground: #2C2C2E;
+--color-secondaryBackground: #1c1c1e;
+--color-tertiaryBackground: #2c2c2e;
 ```
 
 **Semantic Colors:**
+
 ```css
---color-blue: #007AFF;        /* Primary actions, links */
---color-green: #34C759;       /* Success, positive actions */
---color-indigo: #5856D6;      /* Alternative accent */
---color-orange: #FF9500;      /* Warnings */
---color-pink: #FF2D55;        /* Destructive actions */
---color-purple: #AF52DE;      /* Creative actions */
---color-red: #FF3B30;         /* Errors, destructive */
---color-teal: #5AC8FA;        /* Active states */
---color-yellow: #FFCC00;      /* Attention */
+--color-blue: #007aff; /* Primary actions, links */
+--color-green: #34c759; /* Success, positive actions */
+--color-indigo: #5856d6; /* Alternative accent */
+--color-orange: #ff9500; /* Warnings */
+--color-pink: #ff2d55; /* Destructive actions */
+--color-purple: #af52de; /* Creative actions */
+--color-red: #ff3b30; /* Errors, destructive */
+--color-teal: #5ac8fa; /* Active states */
+--color-yellow: #ffcc00; /* Attention */
 ```
 
 **Usage Guidelines:**
+
 - Use `--color-blue` for primary action buttons (Start, Next)
 - Use `--color-red` for destructive actions (Stop)
 - Use semantic colors consistently (don't use red for success)
@@ -213,19 +225,21 @@ This app is primarily used on iOS devices as a PWA. All UI should follow Apple's
 ### Spacing & Layout
 
 **Spacing Scale:**
+
 ```css
---space-4: 4px;    /* Minimal spacing */
---space-8: 8px;    /* Tight spacing */
---space-12: 12px;  /* Compact spacing */
---space-16: 16px;  /* Standard spacing */
---space-20: 20px;  /* Comfortable spacing */
---space-24: 24px;  /* Section spacing */
---space-32: 32px;  /* Large spacing */
---space-40: 40px;  /* Extra large spacing */
---space-48: 48px;  /* Major section spacing */
+--space-4: 4px; /* Minimal spacing */
+--space-8: 8px; /* Tight spacing */
+--space-12: 12px; /* Compact spacing */
+--space-16: 16px; /* Standard spacing */
+--space-20: 20px; /* Comfortable spacing */
+--space-24: 24px; /* Section spacing */
+--space-32: 32px; /* Large spacing */
+--space-40: 40px; /* Extra large spacing */
+--space-48: 48px; /* Major section spacing */
 ```
 
 **Layout Guidelines:**
+
 - Use 16px (--space-16) as the default page margin on mobile
 - Use 20px (--space-20) for spacing between major UI sections
 - Use 8px (--space-8) for spacing within component groups
@@ -233,6 +247,7 @@ This app is primarily used on iOS devices as a PWA. All UI should follow Apple's
 - Respect safe areas (especially iPhone notch and home indicator)
 
 **Safe Areas:**
+
 ```css
 /* Account for iOS safe areas */
 padding-top: env(safe-area-inset-top);
@@ -245,7 +260,8 @@ padding-left: env(safe-area-inset-left);
 
 **Buttons:**
 
-*Primary Button (Filled):*
+_Primary Button (Filled):_
+
 ```css
 background: var(--color-blue);
 color: white;
@@ -258,13 +274,15 @@ min-height: 44px; /* Minimum touch target */
 transition: opacity 0.2s ease;
 ```
 
-*Destructive Button:*
+_Destructive Button:_
+
 ```css
 background: var(--color-red);
 /* Same properties as primary */
 ```
 
-*Secondary Button (Tinted):*
+_Secondary Button (Tinted):_
+
 ```css
 background: rgba(0, 122, 255, 0.15); /* Tinted fill */
 color: var(--color-blue);
@@ -272,11 +290,13 @@ color: var(--color-blue);
 ```
 
 **Button States:**
+
 - Hover: `opacity: 0.8`
 - Active/Pressed: `opacity: 0.5` with 0.2s transition
 - Disabled: `opacity: 0.3` and `cursor: not-allowed`
 
 **Cards & Containers:**
+
 ```css
 background: var(--color-secondaryBackground);
 border-radius: 12px; /* iOS uses 12px for cards */
@@ -285,6 +305,7 @@ box-shadow: none; /* iOS rarely uses shadows in light mode */
 ```
 
 **Dark Mode Cards:**
+
 ```css
 background: var(--color-secondaryBackground);
 /* Subtle border in dark mode for definition */
@@ -292,6 +313,7 @@ border: 0.5px solid var(--color-separator);
 ```
 
 **Progress Indicators:**
+
 - Use continuous animations (no steps)
 - Height: 4px for thin bars, 8px for standard
 - Border radius: Full (50% of height)
@@ -299,6 +321,7 @@ border: 0.5px solid var(--color-separator);
 - Background: `--color-tertiaryFill`
 
 **Circular Progress:**
+
 - Use SF Symbols style circular indicators
 - Stroke width: 4-6px
 - Cap: round
@@ -307,14 +330,16 @@ border: 0.5px solid var(--color-separator);
 ### Animations & Transitions
 
 **Timing Functions:**
+
 ```css
---ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);     /* Standard easing */
---ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);        /* Deceleration */
---ease-in: cubic-bezier(0.4, 0.0, 1.0, 1.0);       /* Acceleration */
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* Standard easing */
+--ease-out: cubic-bezier(0, 0, 0.2, 1); /* Deceleration */
+--ease-in: cubic-bezier(0.4, 0, 1, 1); /* Acceleration */
 --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1); /* Natural motion */
 ```
 
 **Duration Guidelines:**
+
 - Micro-interactions (button press): 100-200ms
 - UI element transitions: 200-300ms
 - View transitions: 300-400ms
@@ -322,16 +347,19 @@ border: 0.5px solid var(--color-separator);
 - Never exceed 600ms (feels sluggish)
 
 **Animation Principles:**
+
 - Use subtle, purposeful motion
 - Prefer opacity and transform over position changes
 - Respect `prefers-reduced-motion` media query
 - Avoid animating width/height (use scale instead)
 
 **Example:**
+
 ```css
 button {
-  transition: opacity 0.2s var(--ease-out),
-              transform 0.2s var(--ease-out);
+  transition:
+    opacity 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
 }
 
 button:active {
@@ -343,22 +371,26 @@ button:active {
 ### Accessibility
 
 **Touch Targets:**
+
 - Minimum: 44×44px (Apple requirement)
 - Preferred: 48×48px for primary actions
 - Ensure adequate spacing between targets (8px minimum)
 
 **Text Accessibility:**
+
 - Support Dynamic Type (respond to user font size preferences)
 - Maintain contrast ratios: 4.5:1 for text, 3:1 for UI elements
 - Use semantic HTML (`<button>`, `<header>`, etc.)
 
 **VoiceOver Support:**
+
 - Add `aria-label` for icon-only buttons
 - Use `role` attributes appropriately
 - Announce dynamic content changes with `aria-live`
 - Ensure focus order matches visual order
 
 **Reduced Motion:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -372,6 +404,7 @@ button:active {
 ### Dark Mode
 
 **Implementation:**
+
 ```css
 @media (prefers-color-scheme: dark) {
   :root {
@@ -383,6 +416,7 @@ button:active {
 ```
 
 **Guidelines:**
+
 - Support both light and dark modes
 - Use semantic color variables (not hardcoded colors)
 - Test all states in both modes
@@ -392,29 +426,34 @@ button:active {
 ### iOS-Specific Considerations
 
 **Status Bar:**
+
 ```html
 <!-- In index.html -->
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <!-- Use "black-translucent" for full-screen apps -->
 ```
 
 **Viewport:**
+
 ```html
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 ```
 
 **Home Screen:**
+
 ```html
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Eye Exercise">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Eye Exercise" />
 ```
 
 **Haptic Feedback (if implementing via library):**
+
 - Light: For small UI changes
 - Medium: For warnings, moderate actions
 - Heavy: For errors, destructive actions
 
 **Scroll Behavior:**
+
 ```css
 /* Smooth momentum scrolling on iOS */
 -webkit-overflow-scrolling: touch;
