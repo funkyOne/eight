@@ -158,6 +158,7 @@ body {
    ======================================== */
 
 .exercise-view {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -165,6 +166,8 @@ body {
   align-items: center;
   gap: var(--space-32);
   padding: var(--space-20) 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .exercise-name {
@@ -376,6 +379,72 @@ button {
   background-color: var(--primary-color);
   transition: width 0.3s var(--ease-standard);
   border-radius: 2px;
+}
+
+/* ========================================
+   Pause Overlay
+   ======================================== */
+
+.pause-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.2s var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pause-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  animation: scaleIn 0.3s var(--ease-standard);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pause-icon {
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.pause-label {
+  font-size: var(--font-size-title1);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.02em;
+}
+
+.pause-hint {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 /* ========================================

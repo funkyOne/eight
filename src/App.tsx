@@ -92,6 +92,7 @@ const App = () => {
       timeline,
       startedAt: Date.now(), // Update the start time for the new exercise
       secondsElapsedInSegment: 0,
+      isPaused: false,
     };
     speak(exercise.name);
     ensureTimer();
@@ -105,6 +106,11 @@ const App = () => {
     const timerId = window.setInterval(() => {
       setState((currentState) => {
         if (!currentState) return null;
+
+        // If paused, don't advance the timer
+        if (currentState.isPaused) {
+          return currentState;
+        }
 
         const { timeline, segmentIndex, index, startedAt } = currentState;
         const segment = timeline[segmentIndex];
@@ -178,6 +184,30 @@ const App = () => {
     }
   };
 
+  const handlePause = () => {
+    setState((currentState) => {
+      if (!currentState) return null;
+
+      if (currentState.isPaused) {
+        // Resuming: adjust startedAt to account for pause duration
+        const pauseDuration = Date.now() - (currentState.pausedAt || Date.now());
+        return {
+          ...currentState,
+          isPaused: false,
+          startedAt: currentState.startedAt + pauseDuration,
+          pausedAt: undefined,
+        };
+      } else {
+        // Pausing: record when we paused
+        return {
+          ...currentState,
+          isPaused: true,
+          pausedAt: Date.now(),
+        };
+      }
+    });
+  };
+
   const exercise = useMemo(() => {
     if (state == null) return null;
 
@@ -210,7 +240,9 @@ const App = () => {
       handleStop={handleStop}
       handleStart={handleStart}
       handleNext={handleNext}
+      handlePause={handlePause}
       progress={progress}
+      isPaused={state?.isPaused || false}
     />
   );
 };

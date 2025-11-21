@@ -8,15 +8,17 @@ export interface AppViewProps {
   handleStop: () => void;
   handleStart: () => void;
   handleNext: () => void;
+  handlePause: () => void;
   progress: number;
+  isPaused: boolean;
 }
 
-const AppView = ({ exercise, handleStop, handleStart, handleNext, progress }: AppViewProps) => {
+const AppView = ({ exercise, handleStop, handleStart, handleNext, handlePause, progress, isPaused }: AppViewProps) => {
   return (
     <div className="app">
       {exercise ? (
         <>
-          <ExerciseView {...exercise} />
+          <ExerciseView {...exercise} onPause={handlePause} isPaused={isPaused} />
           <ControlButtons onStop={handleStop} onNext={handleNext} />
           <ProgressBar progress={progress} />
         </>
