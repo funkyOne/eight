@@ -23,4 +23,6 @@ export interface AppState {
   timeline: ExerciseSegment[];
   startedAt: number; // Start time of the current exercise
   secondsElapsedInSegment: number; // Elapsed time since the start of the current segment
+  isPaused: boolean; // Whether the exercise is currently paused
+  pausedAt?: number; // Timestamp when the exercise was paused
 }
