@@ -178,11 +178,19 @@ body {
   font-weight: 700;
   line-height: 1.2;
   padding: 0 var(--space-16);
-  /* Reserve space for two lines to prevent layout shift */
+  /* Reserve fixed space for two lines to prevent layout shift */
+  height: calc(var(--font-size-title1) * 1.2 * 2);
   min-height: calc(var(--font-size-title1) * 1.2 * 2);
+  max-height: calc(var(--font-size-title1) * 1.2 * 2);
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Ensure text wraps properly within the fixed height */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  /* Prevent overflow while maintaining layout */
+  overflow: hidden;
 }
 
 /* ========================================
@@ -245,6 +253,11 @@ body {
   flex-wrap: wrap;
   gap: var(--space-8);
   padding: 0 var(--space-16);
+  /* Reserve fixed height to prevent layout shift when wrapping */
+  /* Accommodates up to 2 rows: 10px indicator + 8px gap = 18px per row */
+  min-height: 44px; /* 2 rows: (10px + 8px) * 2 + 8px spacing = 44px */
+  /* Ensure consistent spacing even when wrapping */
+  align-content: center;
 }
 
 .segment-indicator {
@@ -491,8 +504,10 @@ button:focus-visible {
 
   .exercise-name {
     font-size: var(--font-size-title2);
-    /* Update min-height for smaller font size */
+    /* Update fixed height for smaller font size */
+    height: calc(var(--font-size-title2) * 1.2 * 2);
     min-height: calc(var(--font-size-title2) * 1.2 * 2);
+    max-height: calc(var(--font-size-title2) * 1.2 * 2);
   }
 }
 
