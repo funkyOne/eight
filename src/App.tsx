@@ -1,8 +1,8 @@
 import { useMemo, useState } from "preact/hooks";
 
 import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
-import { speak, speakPraise } from "./utils/speech";
 import { load, SoundHandle } from "./utils/audio";
+import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
 
@@ -25,6 +25,9 @@ async function ensureAudio() {
   workSound = b;
 
   soundEnabled = true;
+  
+  // Preload announcement MP3 files for offline use
+  void preloadAnnouncements();
 }
 
 const plan: Plan = {
@@ -94,7 +97,7 @@ const App = () => {
       secondsElapsedInSegment: 0,
       isPaused: false,
     };
-    speak(exercise.name);
+    void announceExercise(exercise.name);
     ensureTimer();
     console.log(newState);
     return newState;

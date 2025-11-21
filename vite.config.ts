@@ -34,7 +34,7 @@ export default defineConfig({
         scope: "/",
         //   "theme_color": "#3367D6"
       },
-      includeAssets: ["sounds/*.wav", "vite.svg"],
+      includeAssets: ["sounds/*.wav", "announcements/*.mp3", "vite.svg"],
       // devOptions: {
       //   enabled: true,
       // },
