@@ -128,28 +128,114 @@ body {
 }
 
 /* ========================================
-   Header
+   Start Screen
    ======================================== */
 
-.app-header {
-  background-color: var(--color-secondaryBackground);
-  color: var(--color-label);
-  padding: var(--space-16) var(--space-20);
+.start-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-40);
+  cursor: pointer;
+  margin: calc(var(--space-20) * -1);
+  padding: var(--space-20);
+  border-radius: 24px;
+  transition: background-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.start-screen:active {
+  background-color: var(--color-secondaryFill);
+  transform: scale(0.98);
+}
+
+.start-content {
   text-align: center;
-  border-radius: 12px;
-  margin-bottom: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  animation: slideUpFade 0.6s var(--ease-out);
 }
 
-.app-header h1 {
-  font-size: var(--font-size-largeTitle);
-  font-weight: 700;
+.start-content h1 {
+  font-size: 42px;
+  font-weight: 800;
   margin: 0;
-  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-label);
 }
 
-@media (prefers-color-scheme: dark) {
-  .app-header {
-    border: 0.5px solid var(--color-separator);
+.start-hint {
+  font-size: var(--font-size-title3);
+  color: var(--color-secondaryLabel);
+  margin: 0;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.start-visual {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s var(--ease-standard);
+  animation: scaleIn 0.6s var(--ease-out) 0.1s backwards;
+}
+
+/* Pulse animation for the play button to make it inviting */
+.start-visual::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: -1;
+}
+
+.start-visual svg {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+}
+
+.start-screen:hover .start-visual {
+  transform: scale(1.08);
+}
+
+.start-screen:active .start-visual {
+  transform: scale(0.96);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
   }
 }
 
@@ -314,39 +400,6 @@ button {
   user-select: none;
 }
 
-/* Primary Button (Start) */
-.start-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 14px 32px;
-  font-size: var(--font-size-body);
-  font-weight: 600;
-  min-height: 50px;
-  min-width: 200px;
-  transition:
-    opacity 0.2s var(--ease-out),
-    transform 0.2s var(--ease-out);
-  box-shadow: none;
-}
-
-.start-button:hover {
-  opacity: 0.8;
-}
-
-.start-button:active {
-  opacity: 0.5;
-  transform: scale(0.96);
-}
-
-/* Start button container - centers the button */
-.start-button-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 /* Control Buttons Container */
 .control-buttons {
