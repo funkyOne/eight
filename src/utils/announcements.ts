@@ -1,5 +1,14 @@
 import { speak, speakPraise as ttsSpeakPraise } from "./speech";
-import { getRandomPraiseClip } from "./praise";
+import { getRandomPraiseClip, PraiseClip } from "./praise";
+
+let selectedPraiseClip: PraiseClip | null = null;
+
+function ensurePraiseClip(): PraiseClip {
+  if (!selectedPraiseClip) {
+    selectedPraiseClip = getRandomPraiseClip();
+  }
+  return selectedPraiseClip;
+}
 
 /**
  * Configuration for announcement system
@@ -132,7 +141,7 @@ export async function announceExercise(exerciseName: string): Promise<void> {
  * Speak praise using TTS (no MP3 version available)
  */
 export function speakPraise(): void {
-  const clip = getRandomPraiseClip();
+  const clip = ensurePraiseClip();
 
   if (announcementMode === "mp3") {
     void playMp3(clip.mp3).catch((error) => {
@@ -146,18 +155,20 @@ export function speakPraise(): void {
 }
 
 /**
- * Preload announcement MP3 files for offline use
+ * Preload announcement and praise MP3 files for offline use
  */
 export async function preloadAnnouncements(orderedExerciseNames?: string[]): Promise<void> {
   if (typeof window === "undefined") return;
   if (announcementMode !== "mp3") return;
   
-  const filenames = orderedExerciseNames 
+  const exerciseFilenames = orderedExerciseNames 
     ? orderedExerciseNames.map(name => exerciseNameToMp3[name]).filter(Boolean)
     : Object.values(exerciseNameToMp3);
+  const clip = ensurePraiseClip();
+  const filesToPreload = Array.from(new Set([...exerciseFilenames, clip.mp3]));
   
   // Load MP3 files sequentially
-  for (const filename of filenames) {
+  for (const filename of filesToPreload) {
     try {
       await loadMp3(filename);
     } catch (error) {
