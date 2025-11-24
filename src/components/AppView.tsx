@@ -18,9 +18,9 @@ const AppView = ({ exercise, handleStop, handleStart, handleNext, handlePause, p
     <div className="app">
       {exercise ? (
         <>
+          <ProgressBar progress={progress} />
           <ExerciseView {...exercise} onPause={handlePause} isPaused={isPaused} />
           <ControlButtons onStop={handleStop} onNext={handleNext} />
-          <ProgressBar progress={progress} />
         </>
       ) : (
         <div className="start-screen" onClick={handleStart}>
