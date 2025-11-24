@@ -17,3 +17,9 @@ A set is a series of repetitions performed sequentially. For example, eight repe
 ### Rest
 
 The rest interval is the time spent resting between sets that allow the muscle to recover.
+
+
+
+# Voice
+https://anyvoicelab.com/
+Ava Voice 1
