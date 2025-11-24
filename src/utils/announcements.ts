@@ -135,21 +135,23 @@ export function speakPraise(): void {
 }
 
 /**
- * Preload all announcement MP3 files for offline use
+ * Preload announcement MP3 files for offline use
  */
-export async function preloadAnnouncements(): Promise<void> {
+export async function preloadAnnouncements(orderedExerciseNames?: string[]): Promise<void> {
   if (typeof window === "undefined") return;
   if (announcementMode !== "mp3") return;
   
-  const filenames = Object.values(exerciseNameToMp3);
+  const filenames = orderedExerciseNames 
+    ? orderedExerciseNames.map(name => exerciseNameToMp3[name]).filter(Boolean)
+    : Object.values(exerciseNameToMp3);
   
-  // Load all MP3 files in parallel
-  await Promise.allSettled(
-    filenames.map((filename) => 
-      loadMp3(filename).catch((error) => {
-        console.warn(`Failed to preload ${filename}:`, error);
-      })
-    )
-  );
+  // Load MP3 files sequentially
+  for (const filename of filenames) {
+    try {
+      await loadMp3(filename);
+    } catch (error) {
+      console.warn(`Failed to preload ${filename}:`, error);
+    }
+  }
 }
 

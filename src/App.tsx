@@ -1,4 +1,4 @@
-import { useMemo, useState } from "preact/hooks";
+import { useMemo, useState, useEffect } from "preact/hooks";
 
 import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
 import { load, SoundHandle } from "./utils/audio";
@@ -25,9 +25,6 @@ async function ensureAudio() {
   workSound = b;
 
   soundEnabled = true;
-  
-  // Preload announcement MP3 files for offline use
-  void preloadAnnouncements();
 }
 
 const plan: Plan = {
@@ -85,6 +82,11 @@ const App = () => {
   const [currentTimer, setCurrentTimer] = useState<number | null>(null);
 
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
+
+  useEffect(() => {
+    const exerciseNames = plan.exercises.map((e) => e.name);
+    void preloadAnnouncements(exerciseNames);
+  }, []);
 
   function selectExercise(index: number) {
     const exercise = plan.exercises[index];
