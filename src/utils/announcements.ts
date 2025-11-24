@@ -1,4 +1,5 @@
 import { speak, speakPraise as ttsSpeakPraise } from "./speech";
+import { getRandomPraiseClip } from "./praise";
 
 /**
  * Configuration for announcement system
@@ -131,7 +132,17 @@ export async function announceExercise(exerciseName: string): Promise<void> {
  * Speak praise using TTS (no MP3 version available)
  */
 export function speakPraise(): void {
-  ttsSpeakPraise();
+  const clip = getRandomPraiseClip();
+
+  if (announcementMode === "mp3") {
+    void playMp3(clip.mp3).catch((error) => {
+      console.warn(`Failed to play praise MP3 "${clip.mp3}", falling back to TTS`, error);
+      ttsSpeakPraise(clip.text);
+    });
+    return;
+  }
+
+  ttsSpeakPraise(clip.text);
 }
 
 /**

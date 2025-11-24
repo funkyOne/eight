@@ -1,5 +1,7 @@
 let englishVoices: SpeechSynthesisVoice[] | null = null;
 
+import { getRandomPraiseClip } from "./praise";
+
 export const speak = (text: string): void => {
   const utterance = new SpeechSynthesisUtterance(text);
 
@@ -27,20 +29,7 @@ export const speak = (text: string): void => {
   window.speechSynthesis.speak(utterance);
 };
 
-const praisePhrases = [
-  "Good job!",
-  "Nice one, pal!",
-  "Well done, buddy!",
-  "You are the best",
-  "All done!",
-  "You've made it",
-  "Keep up the good work!",
-  "You're doing great!",
-  "Fantastic work!",
-  "Keep it up!",
-];
-
-export function speakPraise() {
-  const randomPhrase = praisePhrases[Math.floor(Math.random() * praisePhrases.length)];
-  speak(randomPhrase);
+export function speakPraise(phrase?: string): void {
+  const text = phrase ?? getRandomPraiseClip().text;
+  speak(text);
 }
