@@ -173,24 +173,40 @@ body {
 .exercise-name {
   text-align: center;
   margin: 0;
-  color: var(--color-label);
-  font-size: var(--font-size-title1);
-  font-weight: 700;
-  line-height: 1.2;
   padding: 0 var(--space-16);
-  /* Reserve fixed space for two lines to prevent layout shift */
-  height: calc(var(--font-size-title1) * 1.2 * 2);
-  min-height: calc(var(--font-size-title1) * 1.2 * 2);
-  max-height: calc(var(--font-size-title1) * 1.2 * 2);
+  /* Use flexbox for vertical centering */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Ensure text wraps properly within the fixed height */
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-  /* Prevent overflow while maintaining layout */
+  gap: 2px;
+  /* Reserve fixed space for layout consistency */
+  min-height: 80px;
+}
+
+.exercise-category {
+  font-size: var(--font-size-title3);
+  font-weight: 600;
+  color: var(--color-secondaryLabel);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.exercise-category--placeholder {
+  visibility: hidden;
+  height: 0;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
+}
+
+.exercise-specific {
+  font-size: var(--font-size-title1);
+  font-weight: 700;
+  color: var(--color-label);
+  line-height: 1.2;
+  margin: 0;
 }
 
 /* ========================================
@@ -503,11 +519,15 @@ button:focus-visible {
   }
 
   .exercise-name {
+    min-height: 70px;
+  }
+
+  .exercise-category {
+    font-size: var(--font-size-headline);
+  }
+
+  .exercise-specific {
     font-size: var(--font-size-title2);
-    /* Update fixed height for smaller font size */
-    height: calc(var(--font-size-title2) * 1.2 * 2);
-    min-height: calc(var(--font-size-title2) * 1.2 * 2);
-    max-height: calc(var(--font-size-title2) * 1.2 * 2);
   }
 }
 
