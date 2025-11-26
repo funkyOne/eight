@@ -5,6 +5,10 @@ import { load, SoundHandle } from "./utils/audio";
 import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { useSettings, initializeSettings } from "./hooks/useSettings";
+
+// Initialize settings from localStorage on app load
+initializeSettings();
 
 let restSound: SoundHandle | undefined;
 let workSound: SoundHandle | undefined;
@@ -80,8 +84,10 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
 const App = () => {
   const [state, setState] = useState<AppState | null>(null);
   const [currentTimer, setCurrentTimer] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
+  const { voiceMode, updateVoiceMode } = useSettings();
 
   useEffect(() => {
     const exerciseNames = plan.exercises.map((e) => e.name);
@@ -248,6 +254,11 @@ const App = () => {
       handlePause={handlePause}
       progress={progress}
       isPaused={state?.isPaused || false}
+      showSettings={showSettings}
+      onOpenSettings={() => setShowSettings(true)}
+      onCloseSettings={() => setShowSettings(false)}
+      voiceMode={voiceMode}
+      onVoiceModeChange={updateVoiceMode}
     />
   );
 };
