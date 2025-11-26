@@ -1,5 +1,6 @@
 import { speak, speakPraise as ttsSpeakPraise } from "./speech";
 import { getRandomPraiseClip, PraiseClip } from "./praise";
+import { loadAudioBuffer, playAudioBuffer } from "./audio";
 
 let selectedPraiseClip: PraiseClip | null = null;
 
@@ -54,9 +55,9 @@ const exerciseNameToMp3: Record<string, string> = {
 };
 
 /**
- * Cache for loaded audio elements
+ * Cache for loaded AudioBuffers (using Web Audio API for iOS compatibility)
  */
-const audioCache = new Map<string, HTMLAudioElement>();
+const audioBufferCache = new Map<string, AudioBuffer>();
 
 /**
  * Base path for announcement MP3 files
@@ -64,49 +65,27 @@ const audioCache = new Map<string, HTMLAudioElement>();
 const ANNOUNCEMENTS_BASE_PATH = "./announcements/";
 
 /**
- * Load an MP3 file and cache it
+ * Load an MP3 file as AudioBuffer and cache it
+ * Using AudioBuffer instead of HTMLAudioElement for iOS compatibility
  */
-async function loadMp3(filename: string): Promise<HTMLAudioElement> {
-  if (audioCache.has(filename)) {
-    return audioCache.get(filename)!;
+async function loadMp3(filename: string): Promise<AudioBuffer> {
+  if (audioBufferCache.has(filename)) {
+    return audioBufferCache.get(filename)!;
   }
 
-  const audio = new Audio(`${ANNOUNCEMENTS_BASE_PATH}${filename}`);
-  
-  // Preload the audio
-  audio.preload = "auto";
-  
-  // Cache the audio element
-  audioCache.set(filename, audio);
-  
-  // Wait for the audio to be ready
-  return new Promise((resolve, reject) => {
-    audio.addEventListener("canplaythrough", () => resolve(audio), { once: true });
-    audio.addEventListener("error", () => reject(new Error(`Failed to load ${filename}`)), { once: true });
-    
-    // Start loading
-    audio.load();
-  });
+  const buffer = await loadAudioBuffer(`${ANNOUNCEMENTS_BASE_PATH}${filename}`);
+  audioBufferCache.set(filename, buffer);
+  return buffer;
 }
 
 /**
- * Play an MP3 announcement
+ * Play an MP3 announcement using Web Audio API
+ * This works on iOS because it uses the shared AudioContext that was unlocked on user interaction
  */
 async function playMp3(filename: string): Promise<void> {
   try {
-    const audio = await loadMp3(filename);
-    
-    // Stop any currently playing announcement
-    audioCache.forEach((cachedAudio) => {
-      if (!cachedAudio.paused) {
-        cachedAudio.pause();
-        cachedAudio.currentTime = 0;
-      }
-    });
-    
-    // Play the new announcement
-    audio.currentTime = 0;
-    await audio.play();
+    const buffer = await loadMp3(filename);
+    playAudioBuffer(buffer);
   } catch (error) {
     console.warn(`Failed to play MP3 ${filename}, falling back to TTS:`, error);
     throw error;
