@@ -591,3 +591,225 @@ button:focus-visible {
     margin-right: auto;
   }
 }
+
+/* ========================================
+   Settings Screen
+   ======================================== */
+
+.settings-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s var(--ease-out);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-8) 0;
+  margin-bottom: var(--space-24);
+}
+
+.settings-title {
+  font-size: var(--font-size-headline);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-label);
+}
+
+.settings-header-spacer {
+  width: 80px; /* Match back button width for centering */
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: none;
+  border: none;
+  padding: var(--space-8) var(--space-12);
+  margin-left: calc(var(--space-12) * -1);
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  color: var(--color-blue);
+  border-radius: 8px;
+  transition: opacity 0.2s var(--ease-out);
+  min-height: 44px;
+}
+
+.back-button:hover {
+  opacity: 0.7;
+}
+
+.back-button:active {
+  opacity: 0.5;
+}
+
+.back-button svg {
+  flex-shrink: 0;
+}
+
+.settings-content {
+  flex: 1;
+}
+
+.settings-section {
+  margin-bottom: var(--space-32);
+}
+
+.settings-section-title {
+  font-size: var(--font-size-footnote);
+  font-weight: 600;
+  color: var(--color-secondaryLabel);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-8) var(--space-16);
+}
+
+.settings-card {
+  background-color: var(--color-secondaryBackground);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-card {
+    border: 0.5px solid var(--color-separator);
+  }
+}
+
+.setting-row {
+  padding: var(--space-16);
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.setting-label {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  color: var(--color-label);
+}
+
+.setting-description {
+  font-size: var(--font-size-footnote);
+  color: var(--color-secondaryLabel);
+}
+
+.setting-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s var(--ease-out);
+  min-height: 60px;
+}
+
+.setting-option:not(:last-child) {
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.setting-option:hover {
+  background-color: var(--color-tertiaryFill);
+}
+
+.setting-option:active {
+  background-color: var(--color-secondaryFill);
+}
+
+.setting-option--active {
+  background-color: transparent;
+}
+
+.option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-tertiaryFill);
+  border-radius: 8px;
+  color: var(--color-secondaryLabel);
+  flex-shrink: 0;
+}
+
+.setting-option--active .option-icon {
+  background-color: var(--color-blue);
+  color: white;
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.option-title {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  color: var(--color-label);
+}
+
+.option-subtitle {
+  font-size: var(--font-size-footnote);
+  color: var(--color-secondaryLabel);
+}
+
+.option-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-blue);
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Settings Cog Button (Start Screen)
+   ======================================== */
+
+.settings-cog {
+  position: absolute;
+  top: var(--space-16);
+  right: var(--space-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: var(--color-secondaryLabel);
+  border-radius: 50%;
+  transition:
+    background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+  z-index: 10;
+}
+
+.settings-cog:hover {
+  background-color: var(--color-tertiaryFill);
+  color: var(--color-label);
+}
+
+.settings-cog:active {
+  background-color: var(--color-secondaryFill);
+}
+
+.start-screen {
+  position: relative; /* For settings cog positioning */
+}
