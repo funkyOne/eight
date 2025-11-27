@@ -1,8 +1,13 @@
 import { useMemo, useState, useEffect } from "preact/hooks";
 
 import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
-import { load, SoundHandle } from "./utils/audio";
-import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
+import {
+  announceExercise,
+  speakPraise,
+  preloadAnnouncements,
+  playTransitionSound,
+  preloadTransitionSounds,
+} from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useSettings, initializeSettings } from "./hooks/useSettings";
@@ -10,8 +15,6 @@ import { useSettings, initializeSettings } from "./hooks/useSettings";
 // Initialize settings from localStorage on app load
 initializeSettings();
 
-let restSound: SoundHandle | undefined;
-let workSound: SoundHandle | undefined;
 let soundEnabled = false;
 
 async function ensureAudio() {
@@ -20,13 +23,8 @@ async function ensureAudio() {
 
   if (soundEnabled) return; // already initialised
 
-  const [a, b] = await load([
-    "./sounds/220174__gameaudio__spacey-loose.wav",
-    "./sounds/220202__gameaudio__teleport-casual.wav",
-  ]);
-
-  restSound = a;
-  workSound = b;
+  // Preload transition sounds on first user interaction (respects iOS autoplay policy)
+  await preloadTransitionSounds();
 
   soundEnabled = true;
 }
@@ -139,10 +137,9 @@ const App = () => {
 
         // Check if there are more segments in the current exercise
         if (nextSegmentIndex < timeline.length) {
-          if (soundEnabled && timeline[nextSegmentIndex].type === "r") {
-            restSound.play();
-          } else {
-            workSound.play();
+          if (soundEnabled) {
+            const soundType = timeline[nextSegmentIndex].type === "r" ? "rest" : "work";
+            void playTransitionSound(soundType);
           }
 
           console.log("Next segment");
