@@ -2,9 +2,7 @@ export type SoundHandle = {
   play: () => void;
 };
 
-// Shared AudioContext for MP3 announcements (critical for iOS)
-// HTMLAudioElement works fine for sounds triggered during user interaction,
-// but announcements need AudioContext since they play from setInterval
+// Shared AudioContext for all audio playback (critical for iOS)
 let sharedAudioContext: AudioContext | null = null;
 
 declare global {
@@ -25,13 +23,6 @@ export function getAudioContext(): AudioContext {
   return sharedAudioContext;
 }
 
-/**
- * Initialize the AudioContext (call this during user interaction)
- */
-export function initAudioContext(): void {
-  getAudioContext();
-}
-
 function unlock(context: AudioContext) {
   // Create and play empty buffer to unlock audio context on iOS
   const buffer = context.createBuffer(1, 1, 22050);
@@ -42,7 +33,7 @@ function unlock(context: AudioContext) {
 }
 
 /**
- * Load an audio file as an AudioBuffer (for use with AudioContext)
+ * Load an audio file as an AudioBuffer
  */
 export async function loadAudioBuffer(url: string): Promise<AudioBuffer> {
   const audioContext = getAudioContext();
@@ -62,47 +53,20 @@ export function playAudioBuffer(buffer: AudioBuffer): void {
   source.start(0);
 }
 
-// HTMLAudioElement-based sounds (for rest/work sounds triggered during user interaction)
-function createSoundHandle(audio: HTMLAudioElement): SoundHandle {
+function createSoundHandle(buffer: AudioBuffer): SoundHandle {
   return {
     play: function () {
-      // Reset to beginning and play
-      audio.currentTime = 0;
-      audio.play().catch((error) => {
-        console.warn("Failed to play sound:", error);
-      });
+      playAudioBuffer(buffer);
     },
   };
 }
 
-async function loadSound(url: string): Promise<SoundHandle> {
-  const audio = new Audio(url);
-  audio.preload = "auto";
-
-  return new Promise((resolve, reject) => {
-    audio.addEventListener(
-      "canplaythrough",
-      () => {
-        resolve(createSoundHandle(audio));
-      },
-      { once: true }
-    );
-    audio.addEventListener(
-      "error",
-      () => {
-        reject(new Error(`Failed to load sound: ${url}`));
-      },
-      { once: true }
-    );
-
-    // Start loading
-    audio.load();
-  });
-}
-
 export async function load(fileUrls: string[]): Promise<SoundHandle[]> {
-  // Also initialize AudioContext here since this is called during user interaction
-  initAudioContext();
-  const soundHandles = await Promise.all(fileUrls.map((url) => loadSound(url)));
+  const soundHandles = await Promise.all(
+    fileUrls.map(async (url) => {
+      const buffer = await loadAudioBuffer(url);
+      return createSoundHandle(buffer);
+    })
+  );
   return soundHandles;
 }
