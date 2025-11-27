@@ -3,6 +3,14 @@ import { getRandomPraiseClip, PraiseClip } from "./praise";
 
 let selectedPraiseClip: PraiseClip | null = null;
 
+/**
+ * Transition sound paths
+ */
+const TRANSITION_SOUNDS = {
+  rest: "./sounds/220174__gameaudio__spacey-loose.wav",
+  work: "./sounds/220202__gameaudio__teleport-casual.wav",
+} as const;
+
 function ensurePraiseClip(): PraiseClip {
   if (!selectedPraiseClip) {
     selectedPraiseClip = getRandomPraiseClip();
@@ -90,20 +98,27 @@ async function loadMp3(filename: string): Promise<HTMLAudioElement> {
 }
 
 /**
+ * Stop any currently playing audio in the cache
+ */
+function stopAllAudio(): void {
+  audioCache.forEach((cachedAudio) => {
+    if (!cachedAudio.paused) {
+      cachedAudio.pause();
+      cachedAudio.currentTime = 0;
+    }
+  });
+}
+
+/**
  * Play an MP3 announcement
  */
 async function playMp3(filename: string): Promise<void> {
   try {
     const audio = await loadMp3(filename);
-    
-    // Stop any currently playing announcement
-    audioCache.forEach((cachedAudio) => {
-      if (!cachedAudio.paused) {
-        cachedAudio.pause();
-        cachedAudio.currentTime = 0;
-      }
-    });
-    
+
+    // Stop any currently playing audio to avoid iOS conflicts
+    stopAllAudio();
+
     // Play the new announcement
     audio.currentTime = 0;
     await audio.play();
@@ -152,6 +167,65 @@ export function speakPraise(): void {
   }
 
   ttsSpeakPraise(clip.text);
+}
+
+/**
+ * Play a transition sound (rest or work)
+ * Uses the same audio cache to avoid iOS audio conflicts
+ */
+export async function playTransitionSound(type: "rest" | "work"): Promise<void> {
+  const soundPath = TRANSITION_SOUNDS[type];
+
+  try {
+    // Load the sound if not cached (uses same cache as announcements)
+    if (!audioCache.has(soundPath)) {
+      const audio = new Audio(soundPath);
+      audio.preload = "auto";
+      audioCache.set(soundPath, audio);
+
+      await new Promise<void>((resolve, reject) => {
+        audio.addEventListener("canplaythrough", () => resolve(), { once: true });
+        audio.addEventListener("error", () => reject(new Error(`Failed to load ${soundPath}`)), { once: true });
+        audio.load();
+      });
+    }
+
+    const audio = audioCache.get(soundPath)!;
+
+    // Stop any currently playing audio to avoid iOS conflicts
+    stopAllAudio();
+
+    // Play the transition sound
+    audio.currentTime = 0;
+    await audio.play();
+  } catch (error) {
+    console.warn(`Failed to play transition sound (${type}):`, error);
+  }
+}
+
+/**
+ * Preload transition sounds for smoother playback
+ */
+export async function preloadTransitionSounds(): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  for (const soundPath of Object.values(TRANSITION_SOUNDS)) {
+    if (!audioCache.has(soundPath)) {
+      try {
+        const audio = new Audio(soundPath);
+        audio.preload = "auto";
+        audioCache.set(soundPath, audio);
+
+        await new Promise<void>((resolve, reject) => {
+          audio.addEventListener("canplaythrough", () => resolve(), { once: true });
+          audio.addEventListener("error", () => reject(new Error(`Failed to load ${soundPath}`)), { once: true });
+          audio.load();
+        });
+      } catch (error) {
+        console.warn(`Failed to preload ${soundPath}:`, error);
+      }
+    }
+  }
 }
 
 /**
