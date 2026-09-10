@@ -1,38 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppState } from "../types";
-import { TransitionAudio } from "./audio";
+import { ExerciseAudio } from "./audio";
 
-class FakeSource {
-  buffer: AudioBuffer | null = null;
-  connect = vi.fn();
-  disconnect = vi.fn();
-  start = vi.fn();
-  stop = vi.fn();
-  onended: (() => void) | null = null;
-}
-
-class FakeContext extends EventTarget {
-  static latest: FakeContext;
-  state = "running";
-  currentTime = 10;
-  destination = {};
-  sources: FakeSource[] = [];
-  decodeAudioData = vi.fn(async () => ({ duration: 1 }));
-  resume = vi.fn(async () => {
-    this.state = "running";
-    this.dispatchEvent(new Event("statechange"));
-  });
-  close = vi.fn(async () => {});
-  constructor() {
-    super();
-    FakeContext.latest = this;
-  }
-  createBufferSource(): FakeSource {
-    const source = new FakeSource();
-    this.sources.push(source);
-    return source;
-  }
-}
+import { FakeContext } from "../test/audioContext";
 
 function exercise(startedAt = Date.now()): AppState {
   return {
@@ -50,7 +20,7 @@ function exercise(startedAt = Date.now()): AppState {
   };
 }
 
-let audio: TransitionAudio;
+let audio: ExerciseAudio;
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(100_000);
@@ -59,7 +29,8 @@ beforeEach(() => {
     "fetch",
     vi.fn(async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(1) })),
   );
-  audio = new TransitionAudio();
+  FakeContext.initialState = "running";
+  audio = new ExerciseAudio();
 });
 afterEach(() => {
   audio.dispose();
@@ -169,5 +140,134 @@ describe("work/rest audio schedule", () => {
     audio.sync(null);
     expect(source.disconnect).toHaveBeenCalledTimes(1);
     expect(source.stop).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("announcements on the session audio context", () => {
+  it("plays successive automatic announcements using the context activated by Start", async () => {
+    // Model Safari's activation boundary: only Start may resume the context;
+    // media-element playback would be denied once the gesture is over.
+    const media = vi.fn(() => {
+      throw new Error("NotAllowedError");
+    });
+    vi.stubGlobal("Audio", media);
+    FakeContext.initialState = "suspended";
+    await audio.preload("./announcements/blink-often.mp3");
+    await audio.prepare();
+    const context = FakeContext.latest;
+    context.resume.mockRejectedValue(new Error("No user gesture"));
+    const fallback = vi.fn();
+    await audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    vi.setSystemTime(160_000);
+    audio.sync(exercise());
+    await audio.playAnnouncement("./announcements/blink-slowly.mp3", fallback);
+    vi.setSystemTime(220_000);
+    await audio.playAnnouncement("./announcements/head-movement-clockwise.mp3", fallback);
+    expect(FakeContext.latest).toBe(context);
+    expect(media).not.toHaveBeenCalled();
+    expect(context.resume).toHaveBeenCalledTimes(1);
+    expect(fallback).not.toHaveBeenCalled();
+    // Three voices plus all 19 scheduled work/rest cues, on one context.
+    expect(context.sources).toHaveLength(22);
+    expect(context.sources[0].start).toHaveBeenCalled();
+    expect(context.sources[20].start).toHaveBeenCalled();
+    expect(context.sources[21].start).toHaveBeenCalled();
+  });
+
+  it("shares pending downloads and decoded MP3s without moving work/rest cues", async () => {
+    await audio.prepare();
+    audio.sync(exercise());
+    const context = FakeContext.latest;
+    const fallback = vi.fn();
+    const url = "./announcements/blink-slowly.mp3";
+    await Promise.all([audio.preload(url), audio.playAnnouncement(url, fallback)]);
+    await audio.playAnnouncement(url, fallback);
+    expect(fetch).toHaveBeenCalledTimes(3); // two cues plus one MP3
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(3);
+    expect(context.sources).toHaveLength(21);
+    context.sources.slice(0, 19).forEach((source, index) => {
+      expect(source.start).toHaveBeenCalledWith(13 + index * 3);
+      expect(source.stop).toHaveBeenCalledTimes(1);
+      expect(source.disconnect).not.toHaveBeenCalled();
+    });
+  });
+
+  it("ignores an old download that completes after Next has announced a newer exercise", async () => {
+    await audio.prepare();
+    let finish!: (response: Response) => void;
+    vi.mocked(fetch).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const fallback = vi.fn();
+    const old = audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    await audio.playAnnouncement("./announcements/blink-slowly.mp3", fallback);
+    const context = FakeContext.latest;
+    expect(context.sources).toHaveLength(1);
+    finish({ ok: true, arrayBuffer: async () => new ArrayBuffer(1) } as Response);
+    await old;
+    expect(context.sources).toHaveLength(1);
+    expect(context.sources[0].stop).not.toHaveBeenCalled();
+    expect(fallback).not.toHaveBeenCalled();
+  });
+
+  it.each(["stop", "pause", "dispose"])("prevents a pending announcement after %s", async (action) => {
+    await audio.prepare();
+    const state = { ...exercise(), timeline: [exercise().timeline[0]] };
+    audio.sync(state);
+    let fail!: (error: Error) => void;
+    vi.mocked(fetch).mockReturnValueOnce(
+      new Promise((_, reject) => {
+        fail = reject;
+      }),
+    );
+    const fallback = vi.fn();
+    const pending = audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    if (action === "dispose") audio.dispose();
+    else audio.sync(action === "stop" ? null : { ...state, isPaused: true });
+    fail(new Error("late failure"));
+    await pending;
+    expect(FakeContext.latest.sources).toHaveLength(0);
+    expect(fallback).not.toHaveBeenCalled();
+  });
+
+  it("falls back on a real decode failure and permits retry", async () => {
+    await audio.prepare();
+    const context = FakeContext.latest;
+    context.decodeAudioData.mockRejectedValueOnce(new Error("bad MP3"));
+    const fallback = vi.fn();
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    expect(fallback).toHaveBeenCalledTimes(1);
+    await audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    expect(fallback).toHaveBeenCalledTimes(1);
+    expect(context.sources).toHaveLength(1);
+    warning.mockRestore();
+  });
+
+  it("waits for the gesture's pending resume before playing the first announcement", async () => {
+    await audio.prepare();
+    const context = FakeContext.latest;
+    context.state = "suspended";
+    let resumed!: () => void;
+    context.resume.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resumed = () => {
+            context.state = "running";
+            resolve();
+          };
+        }),
+    );
+    const preparing = audio.prepare();
+    const fallback = vi.fn();
+    const speaking = audio.playAnnouncement("./announcements/blink-often.mp3", fallback);
+    await audio.preload("./announcements/blink-often.mp3");
+    expect(context.sources).toHaveLength(0);
+    resumed();
+    await Promise.all([preparing, speaking]);
+    expect(context.sources).toHaveLength(1);
+    expect(fallback).not.toHaveBeenCalled();
   });
 });

@@ -3,6 +3,10 @@ let englishVoices: SpeechSynthesisVoice[] | null = null;
 import { getRandomPraiseClip } from "./praise";
 
 export const speak = (text: string): void => {
+  if (typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
+    console.warn("Speech synthesis is unavailable");
+    return;
+  }
   const utterance = new SpeechSynthesisUtterance(text);
 
   if (!englishVoices) {

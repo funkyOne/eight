@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   requestWakeLock: vi.fn(),
 }));
 vi.mock("./utils/audio", () => ({
-  TransitionAudio: class {
+  ExerciseAudio: class {
     prepare = mocks.prepare;
     sync = mocks.sync;
     dispose = mocks.dispose;
@@ -100,7 +100,7 @@ describe("exercise clock and audio lifecycle", () => {
     advance(50);
     expect(output()).toBe("Blink Slowly|2|7|false");
     expect(mocks.sync.mock.lastCall![0].startedAt).toBe(160_000);
-    expect(mocks.announce).toHaveBeenLastCalledWith("Blink Slowly");
+    expect(mocks.announce).toHaveBeenLastCalledWith("Blink Slowly", expect.any(Object));
   });
 
   it("freezes while paused and shifts the audio and UI start equally on resume", () => {

@@ -1,48 +1,24 @@
 import { speak, speakPraise as ttsSpeakPraise } from "./speech";
 import { getRandomPraiseClip, PraiseClip } from "./praise";
+import { ExerciseAudio } from "./audio";
 
+export type AnnouncementMode = "mp3" | "tts";
+let announcementMode: AnnouncementMode = "mp3";
 let selectedPraiseClip: PraiseClip | null = null;
 
-/**
- * Transition sound paths
- */
-const TRANSITION_SOUNDS = {
-  rest: "./sounds/220174__gameaudio__spacey-loose.wav",
-  work: "./sounds/220202__gameaudio__teleport-casual.wav",
-} as const;
-
 function ensurePraiseClip(): PraiseClip {
-  if (!selectedPraiseClip) {
-    selectedPraiseClip = getRandomPraiseClip();
-  }
+  if (!selectedPraiseClip) selectedPraiseClip = getRandomPraiseClip();
   return selectedPraiseClip;
 }
 
-/**
- * Configuration for announcement system
- * Set to 'mp3' to use pre-recorded MP3 files, 'tts' to use text-to-speech
- */
-export type AnnouncementMode = "mp3" | "tts";
-
-let announcementMode: AnnouncementMode = "mp3";
-
-/**
- * Set the announcement mode
- */
 export function setAnnouncementMode(mode: AnnouncementMode): void {
   announcementMode = mode;
 }
 
-/**
- * Get the current announcement mode
- */
 export function getAnnouncementMode(): AnnouncementMode {
   return announcementMode;
 }
 
-/**
- * Maps exercise names to their corresponding MP3 file names
- */
 const exerciseNameToMp3: Record<string, string> = {
   "Blink Often": "blink-often.mp3",
   "Blink Slowly": "blink-slowly.mp3",
@@ -61,193 +37,35 @@ const exerciseNameToMp3: Record<string, string> = {
   "Eyes Palming": "eyes-palming.mp3",
 };
 
-/**
- * Cache for loaded audio elements
- */
-const audioCache = new Map<string, HTMLAudioElement>();
-
-/**
- * Base path for announcement MP3 files
- */
-const ANNOUNCEMENTS_BASE_PATH = "./announcements/";
-
-/**
- * Load an MP3 file and cache it
- */
-async function loadMp3(filename: string): Promise<HTMLAudioElement> {
-  if (audioCache.has(filename)) {
-    return audioCache.get(filename)!;
-  }
-
-  const audio = new Audio(`${ANNOUNCEMENTS_BASE_PATH}${filename}`);
-  
-  // Preload the audio
-  audio.preload = "auto";
-  
-  // Cache the audio element
-  audioCache.set(filename, audio);
-  
-  // Wait for the audio to be ready
-  return new Promise((resolve, reject) => {
-    audio.addEventListener("canplaythrough", () => resolve(audio), { once: true });
-    audio.addEventListener("error", () => reject(new Error(`Failed to load ${filename}`)), { once: true });
-    
-    // Start loading
-    audio.load();
-  });
+function announcementUrl(filename: string): string {
+  return `./announcements/${filename}`;
 }
 
-/**
- * Stop any currently playing audio in the cache
- */
-function stopAllAudio(): void {
-  audioCache.forEach((cachedAudio) => {
-    if (!cachedAudio.paused) {
-      cachedAudio.pause();
-      cachedAudio.currentTime = 0;
-    }
-  });
+export function announceExercise(exerciseName: string, audio: ExerciseAudio): Promise<void> {
+  const filename = exerciseNameToMp3[exerciseName];
+  const url = announcementMode === "mp3" && filename ? announcementUrl(filename) : undefined;
+  return audio.playAnnouncement(url, () => speak(exerciseName));
 }
 
-/**
- * Play an MP3 announcement
- */
-async function playMp3(filename: string): Promise<void> {
-  try {
-    const audio = await loadMp3(filename);
-
-    // Stop any currently playing audio to avoid iOS conflicts
-    stopAllAudio();
-
-    // Play the new announcement
-    audio.currentTime = 0;
-    await audio.play();
-  } catch (error) {
-    console.warn(`Failed to play MP3 ${filename}, falling back to TTS:`, error);
-    throw error;
-  }
-}
-
-/**
- * Announce an exercise name using MP3 or TTS based on current mode
- */
-export async function announceExercise(exerciseName: string): Promise<void> {
-  if (announcementMode === "mp3") {
-    const mp3Filename = exerciseNameToMp3[exerciseName];
-    
-    if (mp3Filename) {
-      try {
-        await playMp3(mp3Filename);
-        return;
-      } catch (error) {
-        // Fall back to TTS if MP3 fails
-        console.warn(`MP3 announcement failed for "${exerciseName}", using TTS fallback`);
-      }
-    } else {
-      console.warn(`No MP3 file found for exercise "${exerciseName}", using TTS fallback`);
-    }
-  }
-  
-  // Use TTS as fallback or if mode is 'tts'
-  speak(exerciseName);
-}
-
-/**
- * Speak praise using TTS (no MP3 version available)
- */
-export function speakPraise(): void {
+export function speakPraise(audio: ExerciseAudio): Promise<void> {
   const clip = ensurePraiseClip();
-
-  if (announcementMode === "mp3") {
-    void playMp3(clip.mp3).catch((error) => {
-      console.warn(`Failed to play praise MP3 "${clip.mp3}", falling back to TTS`, error);
-      ttsSpeakPraise(clip.text);
-    });
-    return;
-  }
-
-  ttsSpeakPraise(clip.text);
+  const url = announcementMode === "mp3" ? announcementUrl(clip.mp3) : undefined;
+  return audio.playAnnouncement(url, () => ttsSpeakPraise(clip.text));
 }
 
-/**
- * Play a transition sound (rest or work)
- * Uses the same audio cache to avoid iOS audio conflicts
- */
-export async function playTransitionSound(type: "rest" | "work"): Promise<void> {
-  const soundPath = TRANSITION_SOUNDS[type];
-
-  try {
-    // Load the sound if not cached (uses same cache as announcements)
-    if (!audioCache.has(soundPath)) {
-      const audio = new Audio(soundPath);
-      audio.preload = "auto";
-      audioCache.set(soundPath, audio);
-
-      await new Promise<void>((resolve, reject) => {
-        audio.addEventListener("canplaythrough", () => resolve(), { once: true });
-        audio.addEventListener("error", () => reject(new Error(`Failed to load ${soundPath}`)), { once: true });
-        audio.load();
-      });
-    }
-
-    const audio = audioCache.get(soundPath)!;
-
-    // Stop any currently playing audio to avoid iOS conflicts
-    stopAllAudio();
-
-    // Play the transition sound
-    audio.currentTime = 0;
-    await audio.play();
-  } catch (error) {
-    console.warn(`Failed to play transition sound (${type}):`, error);
-  }
-}
-
-/**
- * Preload transition sounds for smoother playback
- */
-export async function preloadTransitionSounds(): Promise<void> {
-  if (typeof window === "undefined") return;
-
-  for (const soundPath of Object.values(TRANSITION_SOUNDS)) {
-    if (!audioCache.has(soundPath)) {
-      try {
-        const audio = new Audio(soundPath);
-        audio.preload = "auto";
-        audioCache.set(soundPath, audio);
-
-        await new Promise<void>((resolve, reject) => {
-          audio.addEventListener("canplaythrough", () => resolve(), { once: true });
-          audio.addEventListener("error", () => reject(new Error(`Failed to load ${soundPath}`)), { once: true });
-          audio.load();
-        });
-      } catch (error) {
-        console.warn(`Failed to preload ${soundPath}:`, error);
-      }
-    }
-  }
-}
-
-/**
- * Preload announcement and praise MP3 files for offline use
- */
-export async function preloadAnnouncements(orderedExerciseNames?: string[]): Promise<void> {
-  if (typeof window === "undefined") return;
-  if (announcementMode !== "mp3") return;
-  
-  const exerciseFilenames = orderedExerciseNames 
-    ? orderedExerciseNames.map(name => exerciseNameToMp3[name]).filter(Boolean)
+/** Preload with fetch; media-element readiness is not a playback permission. */
+export async function preloadAnnouncements(audio: ExerciseAudio, orderedExerciseNames?: string[]): Promise<void> {
+  if (typeof window === "undefined" || announcementMode !== "mp3") return;
+  const exerciseFilenames = orderedExerciseNames
+    ? orderedExerciseNames.map((name) => exerciseNameToMp3[name]).filter(Boolean)
     : Object.values(exerciseNameToMp3);
-  const clip = ensurePraiseClip();
-  const filesToPreload = Array.from(new Set([...exerciseFilenames, clip.mp3]));
-  
-  // Load MP3 files sequentially
-  for (const filename of filesToPreload) {
+  const files = new Set([...exerciseFilenames, ensurePraiseClip().mp3]);
+  // Keep preloading sequential; a failed file must not prevent later names from loading.
+  for (const filename of files) {
     try {
-      await loadMp3(filename);
+      await audio.preload(announcementUrl(filename));
     } catch (error) {
       console.warn(`Failed to preload ${filename}:`, error);
     }
   }
 }
-

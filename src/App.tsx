@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from "preact/hooks";
 
 import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
-import { TransitionAudio } from "./utils/audio";
+import { ExerciseAudio } from "./utils/audio";
 import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
@@ -64,24 +64,29 @@ const App = () => {
   const [showSettings, setShowSettings] = useState(false);
   const { voiceMode, updateVoiceMode } = useSettings();
   const current = useRef<AppState | null>(null);
-  const audio = useRef<TransitionAudio | null>(null);
+  const audio = useRef<ExerciseAudio | null>(null);
 
   const updateState = (next: AppState | null): void => {
     current.current = next;
     audio.current?.sync(next);
     setState(next);
   };
+  const getAudio = (): ExerciseAudio => {
+    if (!audio.current) audio.current = new ExerciseAudio();
+    return audio.current;
+  };
   const prepareAudio = (): void => {
-    if (!audio.current) audio.current = new TransitionAudio();
-    void audio.current.prepare().catch((error: unknown) => console.warn("Transition audio failed", error));
+    void getAudio()
+      .prepare()
+      .catch((error: unknown) => console.warn("Audio preparation failed", error));
   };
 
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
 
   useEffect(() => {
     const exerciseNames = plan.exercises.map((e) => e.name);
-    void preloadAnnouncements(exerciseNames);
-  }, []);
+    void preloadAnnouncements(getAudio(), exerciseNames);
+  }, [voiceMode]);
 
   function selectExercise(index: number, startedAt = Date.now()): AppState {
     return {
@@ -105,7 +110,7 @@ const App = () => {
       if (next.index === plan.exercises.length - 1) {
         updateState(null);
         releaseWakeLock();
-        speakPraise();
+        void speakPraise(getAudio());
         return;
       }
       next = selectExercise(next.index + 1, next.startedAt + next.timeline[next.timeline.length - 1].endOffset);
@@ -122,7 +127,7 @@ const App = () => {
     next = { ...next, segmentIndex, secondsElapsedInSegment: elapsed };
     updateState(next);
     if (next.index !== previous.index) {
-      void announceExercise(plan.exercises[next.index].name);
+      void announceExercise(plan.exercises[next.index].name, getAudio());
     }
   };
 
@@ -147,7 +152,7 @@ const App = () => {
   const handleStart = (): void => {
     prepareAudio();
     updateState(selectExercise(0));
-    void announceExercise(plan.exercises[0].name);
+    void announceExercise(plan.exercises[0].name, getAudio());
     void requestWakeLock();
   };
 
@@ -161,7 +166,7 @@ const App = () => {
     if (!previous || previous.index >= plan.exercises.length - 1) return;
     prepareAudio();
     updateState(selectExercise(previous.index + 1));
-    void announceExercise(plan.exercises[previous.index + 1].name);
+    void announceExercise(plan.exercises[previous.index + 1].name, getAudio());
   };
 
   const handlePause = (): void => {
