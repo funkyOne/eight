@@ -1,31 +1,10 @@
-import { useMemo, useState, useEffect } from "preact/hooks";
+import { useMemo, useState, useEffect, useRef } from "preact/hooks";
 
 import { AppState, Exercise, ExerciseSegment, Plan } from "./types";
-import { load, SoundHandle } from "./utils/audio";
+import { TransitionAudio } from "./utils/audio";
 import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
-
-let restSound: SoundHandle | undefined;
-let workSound: SoundHandle | undefined;
-let soundEnabled = false;
-
-async function ensureAudio() {
-  // only run this on the client
-  if (typeof window === "undefined") return;
-
-  if (soundEnabled) return; // already initialised
-
-  const [a, b] = await load([
-    "./sounds/220174__gameaudio__spacey-loose.wav",
-    "./sounds/220202__gameaudio__teleport-casual.wav",
-  ]);
-
-  restSound = a;
-  workSound = b;
-
-  soundEnabled = true;
-}
 
 const plan: Plan = {
   name: "Eye exercises",
@@ -79,7 +58,18 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
 
 const App = () => {
   const [state, setState] = useState<AppState | null>(null);
-  const [currentTimer, setCurrentTimer] = useState<number | null>(null);
+  const current = useRef<AppState | null>(null);
+  const audio = useRef<TransitionAudio | null>(null);
+
+  const updateState = (next: AppState | null): void => {
+    current.current = next;
+    audio.current?.sync(next);
+    setState(next);
+  };
+  const prepareAudio = (): void => {
+    if (!audio.current) audio.current = new TransitionAudio();
+    void audio.current.prepare().catch((error: unknown) => console.warn("Transition audio failed", error));
+  };
 
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
 
@@ -88,129 +78,103 @@ const App = () => {
     void preloadAnnouncements(exerciseNames);
   }, []);
 
-  function selectExercise(index: number) {
-    const exercise = plan.exercises[index];
-    const timeline = genExerciseSegments(exercise);
-    const newState: AppState = {
+  function selectExercise(index: number, startedAt = Date.now()): AppState {
+    return {
       index,
       segmentIndex: 0,
-      timeline,
-      startedAt: Date.now(), // Update the start time for the new exercise
+      timeline: genExerciseSegments(plan.exercises[index]),
+      startedAt,
       secondsElapsedInSegment: 0,
       isPaused: false,
     };
-    void announceExercise(exercise.name);
-    ensureTimer();
-    console.log(newState);
-    return newState;
   }
 
-  const ensureTimer = () => {
-    if (currentTimer) return; // Timer already started
-
-    const timerId = window.setInterval(() => {
-      setState((currentState) => {
-        if (!currentState) return null;
-
-        // If paused, don't advance the timer
-        if (currentState.isPaused) {
-          return currentState;
-        }
-
-        const { timeline, segmentIndex, index, startedAt } = currentState;
-        const segment = timeline[segmentIndex];
-
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-
-        if (Date.now() < startedAt + segment.endOffset) {
-          console.log("No change in segment or exercise");
-          // No change in segment or exercise
-          return { ...currentState, secondsElapsedInSegment: elapsed };
-        }
-
-        // Check if the current segment's time is up
-        let nextSegmentIndex = segmentIndex + 1;
-
-        // Check if there are more segments in the current exercise
-        if (nextSegmentIndex < timeline.length) {
-          if (soundEnabled && timeline[nextSegmentIndex].type === "r") {
-            restSound.play();
-          } else {
-            workSound.play();
-          }
-
-          console.log("Next segment");
-          return { ...currentState, segmentIndex: nextSegmentIndex, secondsElapsedInSegment: elapsed };
-        } else {
-          console.log("Next exercise");
-          // Move to the next exercise
-          let newIndex = index + 1;
-          if (newIndex < plan.exercises.length) {
-            return selectExercise(newIndex);
-          } else {
-            // End of the plan
-            stopTimer();
-
-            speakPraise();
-
-            return null;
-          }
-        }
-      });
-    }, 1000); // Check every second
-
-    setCurrentTimer(timerId);
-  };
-
-  const stopTimer = () => {
-    if (!currentTimer) return;
-
-    clearInterval(currentTimer);
-    setCurrentTimer(null);
-  };
-
-  const handleStart = () => {
-    void ensureAudio();
-    setState(selectExercise(0));
-    void requestWakeLock();
-  };
-
-  const handleStop = () => {
-    stopTimer();
-    setState(null);
-    releaseWakeLock();
-  };
-
-  const handleNext = () => {
-    if (!state) return;
-
-    if (state.index < plan.exercises.length - 1) {
-      setState(selectExercise(state.index + 1));
+  // Derive the visible segment from the same timestamps used by the audio schedule.
+  // Catch up directly after a delayed callback without replaying missed cues.
+  const tick = (): void => {
+    const previous = current.current;
+    if (!previous || previous.isPaused) return;
+    const now = Date.now();
+    let next = previous;
+    while (now >= next.startedAt + next.timeline[next.timeline.length - 1].endOffset) {
+      if (next.index === plan.exercises.length - 1) {
+        updateState(null);
+        releaseWakeLock();
+        speakPraise();
+        return;
+      }
+      next = selectExercise(next.index + 1, next.startedAt + next.timeline[next.timeline.length - 1].endOffset);
+    }
+    const elapsedMs = Math.max(0, now - next.startedAt);
+    const segmentIndex = next.timeline.findIndex((segment) => elapsedMs < segment.endOffset);
+    const elapsed = Math.floor(elapsedMs / 1000);
+    if (
+      next.index === previous.index &&
+      segmentIndex === previous.segmentIndex &&
+      elapsed === previous.secondsElapsedInSegment
+    )
+      return;
+    next = { ...next, segmentIndex, secondsElapsedInSegment: elapsed };
+    updateState(next);
+    if (next.index !== previous.index) {
+      void announceExercise(plan.exercises[next.index].name);
     }
   };
 
-  const handlePause = () => {
-    setState((currentState) => {
-      if (!currentState) return null;
-
-      if (currentState.isPaused) {
-        // Resuming: adjust startedAt to account for pause duration
-        const pauseDuration = Date.now() - (currentState.pausedAt || Date.now());
-        return {
-          ...currentState,
-          isPaused: false,
-          startedAt: currentState.startedAt + pauseDuration,
-          pausedAt: undefined,
-        };
-      } else {
-        // Pausing: record when we paused
-        return {
-          ...currentState,
-          isPaused: true,
-          pausedAt: Date.now(),
-        };
+  useEffect(() => {
+    if (!state || state.isPaused) return;
+    const timer = window.setInterval(tick, 50);
+    const onVisible = (): void => {
+      if (document.visibilityState === "visible") {
+        prepareAudio();
+        tick();
       }
-    });
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [Boolean(state), state?.isPaused, releaseWakeLock]);
+
+  useEffect(() => () => audio.current?.dispose(), []);
+
+  const handleStart = (): void => {
+    prepareAudio();
+    updateState(selectExercise(0));
+    void announceExercise(plan.exercises[0].name);
+    void requestWakeLock();
+  };
+
+  const handleStop = (): void => {
+    updateState(null);
+    releaseWakeLock();
+  };
+
+  const handleNext = (): void => {
+    const previous = current.current;
+    if (!previous || previous.index >= plan.exercises.length - 1) return;
+    prepareAudio();
+    updateState(selectExercise(previous.index + 1));
+    void announceExercise(plan.exercises[previous.index + 1].name);
+  };
+
+  const handlePause = (): void => {
+    const previous = current.current;
+    if (!previous) return;
+    if (previous.isPaused) {
+      prepareAudio();
+      updateState({
+        ...previous,
+        isPaused: false,
+        startedAt: previous.startedAt + Date.now() - (previous.pausedAt ?? Date.now()),
+        pausedAt: undefined,
+      });
+    } else {
+      tick();
+      if (!current.current) return;
+      updateState({ ...current.current, isPaused: true, pausedAt: Date.now() });
+    }
   };
 
   const exercise = useMemo(() => {
