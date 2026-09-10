@@ -23,6 +23,7 @@ vi.mock("./utils/announcements", () => ({
   announceExercise: mocks.announce,
   speakPraise: mocks.praise,
   preloadAnnouncements: vi.fn(),
+  setAnnouncementMode: vi.fn(),
 }));
 vi.mock("./hooks/useWakeLock", () => ({
   useWakeLock: () => ({

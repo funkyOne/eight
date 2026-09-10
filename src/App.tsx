@@ -5,6 +5,9 @@ import { TransitionAudio } from "./utils/audio";
 import { announceExercise, speakPraise, preloadAnnouncements } from "./utils/announcements";
 import AppView from "./components/AppView";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { useSettings, initializeSettings } from "./hooks/useSettings";
+
+initializeSettings();
 
 const plan: Plan = {
   name: "Eye exercises",
@@ -58,6 +61,8 @@ const genExerciseSegments = (exercise: Exercise): ExerciseSegment[] => {
 
 const App = () => {
   const [state, setState] = useState<AppState | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const { voiceMode, updateVoiceMode } = useSettings();
   const current = useRef<AppState | null>(null);
   const audio = useRef<TransitionAudio | null>(null);
 
@@ -212,6 +217,11 @@ const App = () => {
       handlePause={handlePause}
       progress={progress}
       isPaused={state?.isPaused || false}
+      showSettings={showSettings}
+      onOpenSettings={() => setShowSettings(true)}
+      onCloseSettings={() => setShowSettings(false)}
+      voiceMode={voiceMode}
+      onVoiceModeChange={updateVoiceMode}
     />
   );
 };
